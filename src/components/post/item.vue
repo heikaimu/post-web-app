@@ -12,7 +12,10 @@
       <!--<div class="content" @click="openPage(data.ID)">-->
         <!--<TextContent :text="data.content"></TextContent>-->
       <!--</div>-->
-      <ListImg :imgList="data.images | jsonParse"></ListImg>
+      <ListImg v-if="data.images" :imgList="data.images | jsonParse"></ListImg>
+      <div class="god-reply" v-if="data.god_reply">
+        <TextContent :text="data.god_reply.content"></TextContent>
+      </div>
       <div class="other-icon">
         <i slot="icon" class="icon fa fa-comment-o fa-lg" v-text="data.reply_count"></i>
         <router-link v-if="showBarName" :to="`/post/${data.theme_id}`" class="bar-name" v-text="data.theme_name"></router-link>
@@ -102,6 +105,10 @@
           color: #444;
           line-height: 1.5;
         }
+      }
+      .god-reply{
+        background: #f2f2f2;
+        padding: 10px;
       }
       .other-icon{
         height: 30px;

@@ -16,7 +16,7 @@ import 'mint-ui/lib/style.css';
 Vue.use(Mint);
 
 /* 使用axios获取数据 */
-// axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
 Vue.use(VueAxios, axios);
 

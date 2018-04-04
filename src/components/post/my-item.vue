@@ -13,7 +13,7 @@
       <div class="content" @click="openPage(data.ID)">
         <TextContent :text="data.content"></TextContent>
       </div>
-      <ListImg :imgList="data.images | jsonParse"></ListImg>
+      <ListImg v-if="data.images" :imgList="data.images | jsonParse"></ListImg>
       <div class="other-icon">
         <i slot="icon" class="icon fa fa-comment-o fa-lg" v-text="data.reply_count"></i>
       </div>

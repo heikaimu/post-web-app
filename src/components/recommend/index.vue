@@ -1,9 +1,9 @@
 <template>
   <div class="recommend-page-container">
     <mt-header title="新动态" style="background: #333">
-      <!--<router-link to="/login" slot="right">-->
-        <!--<div><i slot="icon" class="fa fa-bell-o fa-lg"></i><mt-badge size="small" type="error">10</mt-badge></div>-->
-      <!--</router-link>-->
+      <router-link to="/new_message" slot="right" v-if="this.loginIfo.isLogin">
+        <NewMessageIcon></NewMessageIcon>
+      </router-link>
     </mt-header>
     <div class="page-infinite-wrapper" ref="wrapper">
       <ul class="page-infinite-list" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading" infinite-scroll-distance="50">
@@ -22,6 +22,8 @@
 <script>
   import PostItem from '@/components/post/item';
   import { getPublish } from '@/api/post';
+  import NewMessageIcon from '@/components/new-message/icon';
+  import { mapGetters } from 'vuex';
     export default {
       data() {
         return {
@@ -34,6 +36,11 @@
           allLoaded: false,
           showPostPage: false
         }
+      },
+      computed: {
+        ...mapGetters([
+          'loginIfo'
+        ])
       },
       mounted() {
         this._getPostList();
@@ -61,7 +68,8 @@
         }
       },
       components: {
-        PostItem
+        PostItem,
+        NewMessageIcon
       }
     }
 </script>

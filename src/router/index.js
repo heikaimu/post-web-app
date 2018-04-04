@@ -22,6 +22,8 @@ const UpdatePwdComponent = asyncComponent('user/update-pwd');
 const UpdateNicknameComponent = asyncComponent('user/update-nickname');
 const UpdateHeadThumbComponent = asyncComponent('user/update-head-thumb');
 const BackgroundComponent = asyncComponent('user/background');
+const NewMessageComponent = asyncComponent('new-message/index');
+const NewMessageDetailsComponent = asyncComponent('new-message/details');
 
 Vue.use(Router)
 
@@ -100,6 +102,14 @@ export default new Router({
     {
       path: '/background',
       component: BackgroundComponent
+    },
+    {
+      path: '/new_message',
+      component: NewMessageComponent
+    },
+    {
+      path: '/new_message_details/:id/:builderId/:subReplyId',
+      component: NewMessageDetailsComponent
     }
   ]
 })

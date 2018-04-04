@@ -10,12 +10,12 @@
             <p class="name" v-text="details.user_nickname"></p>
             <i v-if="details.user_id===builderId">楼主</i>
           </div>
-          <ListImg :imgList="details.images | jsonParse" :all="true"></ListImg>
+          <ListImg v-if="details.images" :imgList="details.images | jsonParse" :all="true"></ListImg>
           <TextContent :text="details.content"></TextContent>
         </div>
         <ul class="sub-list">
           <li class="sub-item" v-for="item in subList">
-            <a class="name" v-text="`${item.nickname}:`"></a>
+            <a class="name">{{item.nickname}}<i class="builder" v-if="item.user_id===builderId">楼主</i>:</a>
             <div class="content" @click="replyThisGay(item.nickname)">
               <TextContent :text="item.content" :inline="true" :size="'small'">
                 <span class="time">{{item.add_time | getPastTime}}</span>
@@ -173,6 +173,13 @@
         .sub-item{
           padding: 10px;
           display: flex;
+          .builder{
+            font-size: 12px;
+            color: #ccc;
+            padding: 3px;
+            font-style: normal;
+            border: 1px solid #e7e7e7;
+          }
           .name{
             font-size: 14px;
             line-height: 1.5;

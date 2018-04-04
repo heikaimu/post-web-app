@@ -4,14 +4,14 @@
         <div class="avatar"><img v-lazy="data.user_head_thumb" alt=""></div>
         <div class="ifo">
           <p class="name">{{data.user_nickname}} <i v-if="data.user_id===builderId">楼主</i></p>
-          <p class="add-time"><i>第{{index+1}}楼</i> {{data.add_time | getPastTime}}</p>
+          <p class="add-time"><i>第{{data.building_num}}楼</i> {{data.add_time | getPastTime}}</p>
         </div>
       </div>
       <div class="reply-content">
         <div @click="openSubReply">
           <TextContent :text="data.content"></TextContent>
         </div>
-        <ListImg :imgList="data.images | jsonParse" :all="true"></ListImg>
+        <ListImg v-if="data.images" :imgList="data.images | jsonParse" :all="true"></ListImg>
         <div v-if="data.sub_reply && data.sub_reply_count!=0" class="sub-reply-wrapper" @click="openSubReply">
           <div class="sub-item" v-for="i in data.sub_reply">
             <a class="name" v-text="`${i.nickname}:`"></a>
