@@ -9,13 +9,15 @@
       </router-link>
     </mt-header>
     <div class="theme-container" v-if="this.loginIfo.isLogin">
-      <div class="page-title">我关注的贴吧</div>
       <Scroll>
+        <div>
+        <div class="page-title">我关注的贴吧</div>
         <ul>
           <li v-for="item in myFocusList">
             <ThemeItem :data="item"></ThemeItem>
           </li>
         </ul>
+        </div>
       </Scroll>
     </div>
   </div>
@@ -75,7 +77,7 @@
       background-color: #f2f2f2;
       .page-title{
         font-size: 20px;
-        margin: 20px auto;
+        padding: 20px 0;
         text-align: center;
         display: block;
         line-height: 1;
