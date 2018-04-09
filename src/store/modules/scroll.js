@@ -8,29 +8,30 @@ const state = {
       position: 0
     },
     {
-      name: 'post_list',
+      name: 'post',
       pageId: 1,
       position: 0
     },
     {
-      name: 'reply_list',
+      name: 'reply',
       pageId: 1,
       position: 0
     }
   ]
 }
 
-const mutation = {
+const mutations = {
   [types.SET_PAGE_SCROLL](state, data) {
-    const { componentName } = data;
+    const { name, position, pageId } = data;
     const indexOfComponent = state.scrollIfo.findIndex((item) => {
-      return item.name = componentName;
+      return item.name === name;
     });
-    state.scrollIfo[indexOfComponent] = data;
+    state.scrollIfo[indexOfComponent].pageId = pageId;
+    state.scrollIfo[indexOfComponent].position = position;
   }
 }
 
 export default {
   state,
-  mutation
+  mutations
 }

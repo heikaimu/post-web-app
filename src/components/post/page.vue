@@ -3,21 +3,28 @@
     <mt-header title="" style="background: #333">
         <div slot="left" @click="handleBack"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
     </mt-header>
-    <div class="page-infinite-wrapper" ref="wrapper">
-      <PostDetails :data="details"></PostDetails>
-      <ul class="page-infinite-list" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading" infinite-scroll-distance="50">
-        <li v-for="(item, index) in list" class="page-infinite-listitem">
-          <ReplyItem
-            :data="item"
-            :index="index"
-            :builderId="details.user_id"
-          ></ReplyItem>
-        </li>
-      </ul>
-      <p v-show="loading" class="page-infinite-loading">
-        <mt-spinner type="fading-circle"></mt-spinner>
-        <span>加载中...</span>
-      </p>
+    <div class="reply-list-container">
+      <Scroll
+        :data="list"
+        :startY="position"
+        :pullup="true"
+        @scrollToEnd="loadMore"
+        :afterScroll="true"
+        @scrollEnd="scrollEnd"
+      >
+        <div>
+          <PostDetails :data="details"></PostDetails>
+          <ul class="page-infinite-list">
+            <li v-for="(item, index) in list" class="page-infinite-listitem">
+              <ReplyItem
+                :data="item"
+                :index="index"
+                :builderId="details.user_id"
+              ></ReplyItem>
+            </li>
+          </ul>
+        </div>
+      </Scroll>
     </div>
     <!--回复-->
     <ReplyMessage
@@ -27,6 +34,7 @@
 </template>
 
 <script>
+  import Scroll from '@/base/scroll/scroll';
   import ThemeDetails from '@/components/theme/details';
   import PostDetails from '@/components/post/details';
   import ReplyItem from '@/components/reply/item';
@@ -34,6 +42,8 @@
   import { getDetails } from '@/api/post';
   import { getList, addOne } from '@/api/reply';
   import { Indicator, Toast } from 'mint-ui';
+  import { mapGetters } from 'vuex';
+  import store from '@/store';
   export default {
     data() {
       return {
@@ -42,15 +52,30 @@
         pageId: 1,
         pageSize: 10,
         restNum: 0,
-        loading: false,
         allLoaded: false,
-        loading: false
+        position: 0
       }
     },
-    mounted() {
+    beforeRouteEnter (to, from, next) { // 只有当从帖子详情页面路由过来的时候才回到之前状态，其余状态都重置
+      var patrn = /^\/sub_reply\//;
+      if (!patrn.exec(from.fullPath)) {
+        const scrollIfo = {
+          name: 'reply',
+          pageId: 1,
+          position: 0
+        }
+        store.commit('SET_PAGE_SCROLL', scrollIfo);
+      }
+      next(vm => {});
+    },
+    computed: {
+      ...mapGetters([
+        'scrollIfo'
+      ])
+    },
+    created() {
       this._getDetails();
-      this._getReplyList();
-      this.loading = true;
+      this.pageInit();
     },
     methods: {
       // 获取帖子详情
@@ -63,19 +88,35 @@
         this.details = data;
       },
       // 获取回复列表
-      async _getReplyList() {
-        this.loading = true;
+      pageInit() {
+        const indexOfComponent = this.scrollIfo.findIndex((item) => {
+          return item.name === 'reply';
+        });
+        const componentScrollIfo = this.scrollIfo[indexOfComponent];
+        this.position = componentScrollIfo.position || 0;
+        let params = {};
         const id = this.$route.params.id;
-        const params = {
-          postId: id,
-          pageId: this.pageId,
-          pageSize: this.pageSize
+        if (componentScrollIfo.pageId === 1) { // 如果现在是第一页的数据
+          params = {
+            postId: id,
+            pageId: this.pageId,
+            pageSize: this.pageSize
+          }
+        } else { // 如果当前vuex的页码不为1的情况
+          params = {
+            postId: id,
+            pageId: 1,
+            pageSize: componentScrollIfo.pageId * this.pageSize
+          }
+          this.pageId = componentScrollIfo.pageId;
         }
-        const { state, message, data } = await getList(params);
+        this._getReplyList(params);
+      },
+      async _getReplyList(params) {
+        const { state, data } = await getList(params);
         if (state) {
           this.restNum = data.count - ((data.pageId - 1) * data.pageSize + data.list.length);
           this.list = this.list.concat(data.list);
-          this.loading = false;
         }
       },
       // 保存回复
@@ -86,7 +127,12 @@
         if (state) {
           this.list = [];
           this.pageId = 1;
-          this._getReplyList();
+          const params = {
+            postId: this.$route.params.id,
+            pageId: this.pageId,
+            pageSize: this.pageSize
+          }
+          this._getReplyList(params);
         }
         Indicator.close();
         Toast({
@@ -95,11 +141,27 @@
           duration: 2000
         });
       },
+      // 加载更多
       loadMore() {
-        if (this.restNum > 0 && this.loading) {
+        if (this.restNum > 0) {
           this.pageId += 1;
-          this._getReplyList();
+          const params = {
+            postId: this.$route.params.id,
+            pageId: this.pageId,
+            pageSize: this.pageSize
+          }
+          this._getReplyList(params);
         }
+      },
+      // 滚动结束
+      scrollEnd(pos) {
+        const position = pos.y;
+        const scrollIfo = {
+          name: 'reply',
+          pageId: this.pageId,
+          position: position
+        }
+        this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
       },
       handleBack() {
         history.go(-1);
@@ -109,7 +171,8 @@
       ReplyItem,
       ThemeDetails,
       PostDetails,
-      ReplyMessage
+      ReplyMessage,
+      Scroll
     }
   }
 </script>
@@ -130,27 +193,13 @@
     top: 0;
     background-color: #fff;
     z-index: 23;
-    .page-infinite-wrapper {
+    .reply-list-container {
       position: absolute;
       left: 0;
       right: 0;
       top: 40px;
       bottom: 50px;
       background-color: #f2f2f2;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
-    }
-    .page-infinite-loading {
-      display: flex;
-      height: 50px;
-      justify-content: center;
-      align-items: center;
-      span{
-        display: inline-block;
-        margin-left: 5px;
-        font-size: 14px;
-        color: #666;
-      }
     }
   }
 

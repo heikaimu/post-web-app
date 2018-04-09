@@ -5,21 +5,27 @@
         <NewMessageIcon></NewMessageIcon>
       </router-link>
     </mt-header>
-    <div class="page-infinite-wrapper" ref="wrapper">
-      <ul class="page-infinite-list" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading" infinite-scroll-distance="50">
-        <li v-for="item in list" class="page-infinite-listitem">
-          <PostItem :data="item" showBarName="true"></PostItem>
-        </li>
-      </ul>
-      <p v-show="loading" class="page-infinite-loading">
-        <mt-spinner type="fading-circle"></mt-spinner>
-        <span>加载中...</span>
-      </p>
+    <div class="recommend-list-container">
+      <Scroll
+        :data="list"
+        :startY="position"
+        :pullup="true"
+        @scrollToEnd="loadMore"
+        :afterScroll="true"
+        @scrollEnd="scrollEnd"
+      >
+        <ul>
+          <li v-for="item in list" class="page-infinite-listitem">
+            <PostItem :data="item" showBarName="true"></PostItem>
+          </li>
+        </ul>
+      </Scroll>
     </div>
   </div>
 </template>
 
 <script>
+  import Scroll from '@/base/scroll/scroll';
   import PostItem from '@/components/post/item';
   import { getPublish } from '@/api/post';
   import NewMessageIcon from '@/components/new-message/icon';
@@ -34,42 +40,75 @@
           restNum: 0,
           loading: false,
           allLoaded: false,
-          showPostPage: false
+          showPostPage: false,
+          position: 0
         }
       },
       computed: {
         ...mapGetters([
-          'loginIfo'
+          'loginIfo',
+          'scrollIfo'
         ])
       },
-      mounted() {
-        this._getPostList();
+      created() {
+        this.pageInit();
       },
       methods: {
-        // 获取帖子列表
-        async _getPostList() {
-          this.loading = true;
-          const params = {
-            pageId: this.pageId,
-            pageSize: this.pageSize
+        pageInit() {
+          const indexOfComponent = this.scrollIfo.findIndex((item) => {
+            return item.name === 'recommend';
+          });
+          const componentScrollIfo = this.scrollIfo[indexOfComponent];
+          this.position = componentScrollIfo.position || 0;
+          let params = {};
+          if (componentScrollIfo.pageId === 1) { // 如果现在是第一页的数据
+            params = {
+              pageId: this.pageId,
+              pageSize: this.pageSize
+            }
+          } else { // 如果当前vuex的页码不为1的情况
+            params = {
+              pageId: 1,
+              pageSize: componentScrollIfo.pageId * this.pageSize
+            }
+            this.pageId = componentScrollIfo.pageId;
           }
-          const { state, message, data } = await getPublish(params);
+          this._getPostList(params);
+        },
+        // 获取帖子列表
+        async _getPostList(params) {
+          const { state, data } = await getPublish(params);
           if (state) {
             this.restNum = data.count - ((data.pageId - 1) * data.pageSize + data.list.length);
             this.list = this.list.concat(data.list);
-            this.loading = false;
           }
         },
+        // 加载更多
         loadMore() {
           if (this.restNum > 0) {
             this.pageId += 1;
-            this._getPostList();
+            const params = {
+              pageId: this.pageId,
+              pageSize: this.pageSize
+            }
+            this._getPostList(params);
           }
+        },
+        // 滚动结束
+        scrollEnd(pos) {
+          const position = pos.y;
+          const scrollIfo = {
+            name: 'recommend',
+            pageId: this.pageId,
+            position: position
+          }
+          this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
         }
       },
       components: {
         PostItem,
-        NewMessageIcon
+        NewMessageIcon,
+        Scroll
       }
     }
 </script>
@@ -88,29 +127,12 @@
         border-top: solid 1px #eee;
       }
     }
-    .page-infinite-wrapper {
+    .recommend-list-container {
       position: absolute;
       left: 0;
       right: 0;
       top: 40px;
       bottom: 0;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
-    }
-    .page-infinite-loading {
-      display: flex;
-      height: 50px;
-      justify-content: center;
-      align-items: center;
-      span{
-        display: inline-block;
-        margin-left: 5px;
-        font-size: 14px;
-        color: #666;
-      }
     }
   }
-
-
-
 </style>

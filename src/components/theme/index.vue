@@ -10,12 +10,19 @@
     </mt-header>
     <div class="theme-container" v-if="this.loginIfo.isLogin">
       <div class="page-title">我关注的贴吧</div>
-      <ThemeItem v-for="item in myFocusList" :data="item"></ThemeItem>
+      <Scroll>
+        <ul>
+          <li v-for="item in myFocusList">
+            <ThemeItem :data="item"></ThemeItem>
+          </li>
+        </ul>
+      </Scroll>
     </div>
   </div>
 </template>
 
 <script>
+  import Scroll from '@/base/scroll/scroll';
   import ThemeItem from '@/components/theme/item';
   import { mapGetters } from 'vuex';
   import { focusList } from '@/api/theme';
@@ -42,7 +49,8 @@
         }
       },
       components: {
-        ThemeItem
+        ThemeItem,
+        Scroll
       }
     }
 </script>

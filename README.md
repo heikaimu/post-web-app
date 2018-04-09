@@ -5,6 +5,8 @@
 
 * 实现代码
 
+给目的路由添加一个meta，属性为requireAuth，用来判断该路由是否需要登录状态
+
 router.js
 ```
 export default new Router({
@@ -19,6 +21,8 @@ export default new Router({
   ]
 })
 ```
+
+在beforeEach钩子中判断目的路由
 
 main.js
 ```
@@ -38,6 +42,8 @@ router.beforeEach((to, from, next) => {
 })
 ```
 
+在登录成功后跳转参数路由地址
+
 login.vue
 ```
 export default {
@@ -50,3 +56,126 @@ export default {
   }
 }
 ```
+
+## 实现列表页面在分页的情况下，跳转时记录位置，返回时候回到之前点击跳转时的位置
+在我们查看详情的时候，可能数据已经是加载多页之后的了，之后时候我们要记录状态就要比一页的数据麻烦一些。
+
+首先我们创建滚动的状态管理器（我们以推荐为例）。
+```
+import * as types from '../mutation-types';
+
+const state = {
+  scrollIfo: [
+    {
+      name: 'recommend',
+      pageId: 1,
+      position: 0
+    }
+  ]
+}
+
+const mutations = {
+  [types.SET_PAGE_SCROLL](state, data) {
+    const { name } = data;
+    const indexOfComponent = state.scrollIfo.findIndex((item) => {
+      return item.name === name;
+    });
+    state.scrollIfo[indexOfComponent] = data;
+  }
+}
+
+export default {
+  state,
+  mutations
+}
+
+```
+
+然后使用强大的better-scroll插件来实现div滚动。插件已经封装成了组件，可以直接使用。其中用到了3个prop属性和2个方法。
+
+```
+<Scroll
+        :data="list"
+        :startY="position"
+        :pullup="true"
+        @scrollToEnd="loadMore"
+        :afterScroll="true"
+        @scrollEnd="scrollEnd"
+      >
+        <ul>
+          <li v-for="item in list" class="page-infinite-listitem">
+            <PostItem :data="item" showBarName="true"></PostItem>
+          </li>
+        </ul>
+      </Scroll>
+```
+
+但滚动结束后派发scrollEnd方法记录当前组件的滚动信息到vuex。
+
+```
+scrollEnd(pos) {
+          const position = pos.y;
+          const scrollIfo = {
+            name: 'recommend',
+            pageId: this.pageId,
+            position: position
+          }
+          this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
+        }
+```
+
+此时我们保存信息的代码就写完了。接下来就是初始化的时候。
+
+我们进入当前路由，pageId可能有2种情况，常规的1，或者！=1（表明了之前加载了多页数据），所以所以我们需要判断情况给接口传递不同的参数。
+
+```
+pageInit() {
+          const indexOfComponent = this.scrollIfo.findIndex((item) => {
+            return item.name === 'recommend';
+          });
+          const componentScrollIfo = this.scrollIfo[indexOfComponent];
+          this.position = componentScrollIfo.position || 0;
+          let params = {};
+          if (componentScrollIfo.pageId === 1) { // 如果现在是第一页的数据
+            params = {
+              pageId: this.pageId,
+              pageSize: this.pageSize
+            }
+          } else { // 如果当前vuex的页码不为1的情况
+            params = {
+              pageId: 1,
+              pageSize: componentScrollIfo.pageId * this.pageSize
+            }
+            this.pageId = componentScrollIfo.pageId;
+          }
+          this._getPostList(params);
+        },
+        // 获取帖子列表
+        async _getPostList(params) {
+          const { state, data } = await getPublish(params);
+          if (state) {
+            this.restNum = data.count - ((data.pageId - 1) * data.pageSize + data.list.length);
+            this.list = this.list.concat(data.list);
+          }
+        }
+```
+
+如果我们需要某些特定的页面才保存状态则使用路由守卫判断from组件然后重置vuex。
+
+```
+beforeRouteEnter (to, from, next) {
+      var patrn = /^\/post_page\//;
+      if (!patrn.exec(from.fullPath)) {
+        const scrollIfo = {
+          name: 'recommend',
+          pageId: 1,
+          position: 0
+        }
+        store.commit('SET_PAGE_SCROLL', scrollIfo);
+      }
+      next(vm => {});
+    },
+```
+
+最终就能实现我们需要的效果。
+

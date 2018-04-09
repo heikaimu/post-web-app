@@ -7,14 +7,15 @@
 </template>
 
 <script>
-export default {
-  name: 'App',
-  data() {
-    return {
-      selected: '我的'
+  export default {
+    name: 'App',
+    data() {
+      return {
+      }
+    },
+    mounted() {
     }
   }
-}
 </script>
 
 <style>

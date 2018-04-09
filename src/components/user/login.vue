@@ -62,12 +62,11 @@
       async _saveCurrentUser() {
         const { state, data, message } = await getUser({});
         if (state) {
-          console.log(data);
           const loginIfo = {
             isLogin: true,
             data: data
           }
-          this.$store.commit('SET_LOGIN', loginIfo)
+          this.$store.commit('SET_LOGIN', loginIfo);
           Indicator.close();
           let redirect = decodeURIComponent(this.$route.query.redirect || '/');
           this.$router.push(redirect);

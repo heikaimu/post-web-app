@@ -10,6 +10,8 @@ import VueAxios from 'vue-axios';
 import './common/scss/reset.scss';
 import * as filters from './filter';
 
+Vue.config.productionTip = false;
+
 // 引入全部Mint组件
 import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css';
@@ -38,8 +40,6 @@ Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key]);
 })
 
-Vue.config.productionTip = false
-
 // 路由拦截
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
@@ -56,7 +56,7 @@ router.beforeEach((to, from, next) => {
   else {
     next();
   }
-})
+});
 
 /* eslint-disable no-new */
 new Vue({
