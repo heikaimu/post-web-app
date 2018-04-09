@@ -30,7 +30,7 @@
           details: {},
           list: [],
           pageId: 1,
-          pageSize: 15,
+          pageSize: 10,
           restNum: 0,
           loading: false,
           allLoaded: false,

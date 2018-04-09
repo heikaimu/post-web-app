@@ -20,3 +20,4 @@ export const deleteOne = (data) => {
   return requestPost(`${API_CONFIG}/deleteOne`, data);
 }
 
+

@@ -1,5 +1,5 @@
 <template>
-  <div class="reply-item" @click="$router.push(`/new_message_details/${replyIfo.ID}/${postIfo.user_id}/${subReplyIfo.ID}`)">
+  <div class="reply-item" @click="checkDetails">
     <div v-if="isReply">
       <div class="reply-author">
         <div class="avatar"><img v-lazy="replyIfo.user_head_thumb" alt=""></div>
@@ -37,6 +37,7 @@
   import TextContent from '@/base/text-content/index';
   import ListImg from '@/base/list-img/index';
   import { mapGetters } from 'vuex';
+  import { deleteOne } from '@/api/new-message';
   export default {
     props: ['data'],
     data() {
@@ -64,6 +65,16 @@
         if (this.data.sub_reply_ifo.length !== 0) this.subReplyIfo =  this.data.sub_reply_ifo[0];
         if (!this.isReply) {
           this.role = this.replyIfo.user_id === this.loginIfo.data.user_id ? '我' : this.replyIfo.user_nickname;
+        }
+      },
+      async checkDetails() {
+        const params = {
+          messageId: this.data.ID
+        }
+        console.log(params);
+        const { state } = await deleteOne(params);
+        if (state) {
+          this.$router.push(`/new_message_details/${this.replyIfo.ID}/${this.postIfo.user_id}/${this.subReplyIfo.ID || -1}`);
         }
       }
     },

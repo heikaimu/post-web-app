@@ -1,7 +1,7 @@
 <template>
   <div class="form-container">
   <mt-header title="登录" style="background-color: #333">
-    <router-link to="/main" slot="left">
+    <router-link :to="decodeURIComponent(this.$route.query.redirect || '/')" slot="left">
       <div><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
     </router-link>
   </mt-header>
@@ -69,7 +69,8 @@
           }
           this.$store.commit('SET_LOGIN', loginIfo)
           Indicator.close();
-          this.$router.push('/main');
+          let redirect = decodeURIComponent(this.$route.query.redirect || '/');
+          this.$router.push(redirect);
         } else {
           Indicator.close();
           Toast(message);

@@ -85,16 +85,16 @@
         Indicator.open('保存中...');
         const { state, message } = await addOne(params);
         if (state) {
-          Indicator.close();
-          Toast({
-            message: '发布成功',
-            position: 'bottom',
-            duration: 2000
-          });
           this.list = [];
           this.pageId = 1;
           this._getPostList();
         }
+        Indicator.close();
+        Toast({
+          message: message,
+          position: 'bottom',
+          duration: 2000
+        });
       },
       loadMore() {
         if (this.restNum > 0) {

@@ -61,10 +61,15 @@
     methods: {
       // 打开回复层
       openReplyMessage() {
+        this.title = '';
+        this.content = '';
         if (this.loginIfo.isLogin) {
           this.showContent = true;
         } else {
-          this.$router.push('/login');
+          this.$router.push({
+            path: '/login',
+            query: { redirect: this.$route.fullPath }
+          });
         }
       },
       appendThisFace(item) {

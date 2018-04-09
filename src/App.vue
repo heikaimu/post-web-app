@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <transition name="slide-fade" mode="in-out">
+    <transition name="slide-fade" mode="out-in">
     <router-view/>
     </transition>
   </div>
@@ -19,13 +19,13 @@ export default {
 
 <style>
   .slide-fade-enter-active {
-    transition: all .3s ease;
+    transition: all .2s ease;
   }
   .slide-fade-leave-active {
-    transition: all .3s ease;
+    transition: all .2s ease;
   }
   .slide-fade-enter, .slide-fade-leave-to{
-    /*transform: translateX(10px);*/
+    transform: translateX(10px);
     opacity: 0;
   }
   .mint-tab-item-icon{

@@ -2,6 +2,7 @@
   <div class="sub-reply-container">
     <mt-header :title="`${details.building_num}楼`" style="background: #333">
       <div slot="left" @click="closeSubReply"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
+      <router-link slot="right" :to="`/post_page/${details.post_id}`">查看本贴</router-link>
     </mt-header>
     <div class="sub-reply-wrapper">
       <div class="builder">
@@ -62,6 +63,7 @@
         }
         const { data } = await getDetails(params);
         this.details = data;
+        console.log(this.details);
       },
       // 获取列表
       async _getList() {

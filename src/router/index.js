@@ -39,7 +39,7 @@ export default new Router({
       children: [
         {
           path: '/',
-          component: RecommendComponent
+          redirect: 'recommend'
         },
         {
           path: 'recommend',
@@ -69,7 +69,10 @@ export default new Router({
     },
     {
       path: '/add_theme',
-      component: AddThemeComponent
+      component: AddThemeComponent,
+      meta: {
+        requireAuth: true
+      }
     },
     {
       path: '/user',

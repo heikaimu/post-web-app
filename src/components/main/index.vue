@@ -51,7 +51,10 @@
           if (this.loginIfo.isLogin) {
             this.$router.push('/user')
           } else {
-            this.$router.push('/login')
+            this.$router.push({
+              path: '/login',
+              query: { redirect: this.$route.fullPath }
+            });
           }
         }
       },

@@ -1,7 +1,7 @@
 <template>
   <div class="new-message-container">
     <mt-header :title="`未读信息（${newMessageCount}）`" style="background-color: #333">
-      <router-link to="/search_theme" slot="left">
+      <router-link to="/main/recommend" slot="left">
         <div><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
       </router-link>
     </mt-header>

@@ -4,7 +4,9 @@
       <router-link to="/search_theme" slot="left">
         <div><i slot="icon" class="fa fa-search fa-lg"></i></div>
       </router-link>
-        <div slot="right" @click="createTheme"><i slot="icon" class="fa fa-plus fa-lg"></i></div>
+      <router-link to="/add_theme" slot="right">
+        <div><i slot="icon" class="fa fa-plus fa-lg"></i></div>
+      </router-link>
     </mt-header>
     <div class="theme-container" v-if="this.loginIfo.isLogin">
       <div class="page-title">我关注的贴吧</div>
@@ -36,14 +38,6 @@
           const { state, message, data } = await focusList({});
           if (state) {
             this.myFocusList = data;
-          }
-        },
-        // 创建贴吧（判断是否登录）
-        createTheme() {
-          if (this.loginIfo.isLogin) {
-            this.$router.push('/add_theme')
-          } else {
-            this.$router.push('/login')
           }
         }
       },
