@@ -1,17 +1,20 @@
 <template>
   <div class="recommend-page-container">
-    <mt-header title="新动态" style="background: #333">
+    <mt-header title="新动态" style="background: #333" fixed v-if="showHeaderAndBar">
       <router-link to="/new_message" slot="right" v-if="this.loginIfo.isLogin">
         <NewMessageIcon></NewMessageIcon>
       </router-link>
     </mt-header>
     <div class="recommend-list-container">
       <Scroll
+        ref="scroll"
         :data="list"
-        :startY="position"
-        :pullup="true"
-        @scrollToEnd="loadMore"
-        :afterScroll="true"
+        :startY="parseInt(position)"
+        :pullUpLoad="isPullUpLoad"
+        :pullDownRefresh="isPullDownRefresh"
+        :listenEndScroll="true"
+        @pullingUp="loadMore"
+        @pullingDown="onPullingDown"
         @scrollEnd="scrollEnd"
       >
         <ul>
@@ -33,15 +36,15 @@
     export default {
       data() {
         return {
-          details: {},
           list: [],
           pageId: 1,
           pageSize: 10,
           restNum: 0,
-          loading: false,
-          allLoaded: false,
-          showPostPage: false,
-          position: 0
+          componentName: 'recommend',
+          position: 0,
+          isPullUpLoad: true,
+          isPullDownRefresh: true,
+          showHeaderAndBar: true
         }
       },
       computed: {
@@ -54,53 +57,57 @@
         this.pageInit();
       },
       methods: {
+        // 初始化数据，主要是获取位置以及离开时的页码方便给pageSize赋值
         pageInit() {
           const indexOfComponent = this.scrollIfo.findIndex((item) => {
-            return item.name === 'recommend';
+            return item.name === this.componentName;
           });
           const componentScrollIfo = this.scrollIfo[indexOfComponent];
           this.position = componentScrollIfo.position || 0;
-          let params = {};
-          if (componentScrollIfo.pageId === 1) { // 如果现在是第一页的数据
-            params = {
-              pageId: this.pageId,
-              pageSize: this.pageSize
-            }
-          } else { // 如果当前vuex的页码不为1的情况
-            params = {
-              pageId: 1,
-              pageSize: componentScrollIfo.pageId * this.pageSize
-            }
-            this.pageId = componentScrollIfo.pageId;
-          }
-          this._getPostList(params);
+          this.pageSize = componentScrollIfo.pageId * this.pageSize;
+          this._getPostList();
+          this.pageId = componentScrollIfo.pageId;
         },
-        // 获取帖子列表
-        async _getPostList(params) {
+        // 获取列表
+        async _getPostList() {
+          const params = {
+            pageId: this.pageId,
+            pageSize: this.pageSize
+          }
           const { state, data } = await getPublish(params);
           if (state) {
             this.restNum = data.count - ((data.pageId - 1) * data.pageSize + data.list.length);
+            if (this.restNum <= 0) this.isPullUpLoad = false; // 上拉加载数据失效
             this.list = this.list.concat(data.list);
+          } else {
+            this.$refs.scroll.forceUpdate();
           }
         },
-        // 加载更多
+        // 上拉加载更多
         loadMore() {
           if (this.restNum > 0) {
             this.pageId += 1;
-            const params = {
-              pageId: this.pageId,
-              pageSize: this.pageSize
-            }
-            this._getPostList(params);
+            this._getPostList();
           }
+        },
+        // 下拉刷新
+        onPullingDown() {
+          this.pageId = 1;
+          this.list = [];
+          this.isPullUpLoad = true;
+          this._getPostList();
         },
         // 滚动结束
         scrollEnd(pos) {
-          const position = pos.y;
+          this.position = pos.y;
+          this.setScrollIfo();
+        },
+        // 设置滚动记录
+        setScrollIfo() {
           const scrollIfo = {
-            name: 'recommend',
+            name: this.componentName,
             pageId: this.pageId,
-            position: position
+            position: this.position
           }
           this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
         }

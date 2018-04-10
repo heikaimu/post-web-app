@@ -1,7 +1,10 @@
 <template>
   <div class="post-item">
     <div class="author-wrapper">
-      <div class="author-avatar"><img v-lazy="data.user_head_thumb"/></div>
+      <div class="author-avatar">
+        <img v-if="data.user_head_thumb" v-lazy="data.user_head_thumb"/>
+        <i v-else slot="icon" class="fa fa-user fa-lg user-icon"></i>
+      </div>
       <div class="text">
         <p class="name" v-text="data.user_nickname"></p>
         <p class="add-time">{{data.add_time | getPastTime}}</p>
@@ -61,9 +64,15 @@
       .author-avatar{
         width: 36px;
         height: 36px;
+        border: 1px solid #e7e7e7;
+        line-height: 36px;
+        text-align: center;
         border-radius: 50%;
         overflow: hidden;
-        background: #666;
+        background: #f2f2f2;
+        .user-icon{
+          color: #666;
+        }
         img{
           width: 100%;
           height: 100%;

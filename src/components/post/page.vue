@@ -5,11 +5,14 @@
     </mt-header>
     <div class="reply-list-container">
       <Scroll
+        ref="scroll"
         :data="list"
-        :startY="position"
-        :pullup="true"
-        @scrollToEnd="loadMore"
-        :afterScroll="true"
+        :startY="parseInt(position)"
+        :pullUpLoad="isPullUpLoad"
+        :pullDownRefresh="isPullDownRefresh"
+        :listenEndScroll="true"
+        @pullingUp="loadMore"
+        @pullingDown="onPullingDown"
         @scrollEnd="scrollEnd"
       >
         <div>
@@ -52,8 +55,12 @@
         pageId: 1,
         pageSize: 10,
         restNum: 0,
-        allLoaded: false,
-        position: 0
+        position: 0,
+        componentName: 'reply',
+        position: 0,
+        isPullUpLoad: true,
+        isPullDownRefresh: true,
+        showHeaderAndBar: true
       }
     },
     beforeRouteEnter (to, from, next) { // 只有当从帖子详情页面路由过来的时候才回到之前状态，其余状态都重置
@@ -87,37 +94,60 @@
         const { data } = await getDetails(params);
         this.details = data;
       },
-      // 获取回复列表
+      // 初始化数据，主要是获取位置以及离开时的页码方便给pageSize赋值
       pageInit() {
         const indexOfComponent = this.scrollIfo.findIndex((item) => {
-          return item.name === 'reply';
+          return item.name === this.componentName;
         });
         const componentScrollIfo = this.scrollIfo[indexOfComponent];
         this.position = componentScrollIfo.position || 0;
-        let params = {};
-        const id = this.$route.params.id;
-        if (componentScrollIfo.pageId === 1) { // 如果现在是第一页的数据
-          params = {
-            postId: id,
-            pageId: this.pageId,
-            pageSize: this.pageSize
-          }
-        } else { // 如果当前vuex的页码不为1的情况
-          params = {
-            postId: id,
-            pageId: 1,
-            pageSize: componentScrollIfo.pageId * this.pageSize
-          }
-          this.pageId = componentScrollIfo.pageId;
-        }
-        this._getReplyList(params);
+        this.pageSize = componentScrollIfo.pageId * this.pageSize;
+        this._getPostList();
+        this.pageId = componentScrollIfo.pageId;
       },
-      async _getReplyList(params) {
+      // 获取列表
+      async _getPostList() {
+        const params = {
+          postId: this.$route.params.id,
+          pageId: this.pageId,
+          pageSize: this.pageSize
+        }
         const { state, data } = await getList(params);
         if (state) {
           this.restNum = data.count - ((data.pageId - 1) * data.pageSize + data.list.length);
+          if (this.restNum <= 0) this.isPullUpLoad = false; // 上拉加载数据失效
           this.list = this.list.concat(data.list);
+        } else {
+          this.$refs.scroll.forceUpdate();
         }
+      },
+      // 上拉加载更多
+      loadMore() {
+        if (this.restNum > 0) {
+          this.pageId += 1;
+          this._getPostList();
+        }
+      },
+      // 下拉刷新
+      onPullingDown() {
+        this.pageId = 1;
+        this.list = [];
+        this.isPullUpLoad = true;
+        this._getPostList();
+      },
+      // 滚动结束
+      scrollEnd(pos) {
+        this.position = pos.y;
+        this.setScrollIfo();
+      },
+      // 设置滚动记录
+      setScrollIfo() {
+        const scrollIfo = {
+          name: this.componentName,
+          pageId: this.pageId,
+          position: this.position
+        }
+        this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
       },
       // 保存回复
       async saveMessage(params) {
@@ -127,12 +157,8 @@
         if (state) {
           this.list = [];
           this.pageId = 1;
-          const params = {
-            postId: this.$route.params.id,
-            pageId: this.pageId,
-            pageSize: this.pageSize
-          }
-          this._getReplyList(params);
+          this.isPullUpLoad = true;
+          this._getPostList();
         }
         Indicator.close();
         Toast({
@@ -140,28 +166,6 @@
           position: 'bottom',
           duration: 2000
         });
-      },
-      // 加载更多
-      loadMore() {
-        if (this.restNum > 0) {
-          this.pageId += 1;
-          const params = {
-            postId: this.$route.params.id,
-            pageId: this.pageId,
-            pageSize: this.pageSize
-          }
-          this._getReplyList(params);
-        }
-      },
-      // 滚动结束
-      scrollEnd(pos) {
-        const position = pos.y;
-        const scrollIfo = {
-          name: 'reply',
-          pageId: this.pageId,
-          position: position
-        }
-        this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
       },
       handleBack() {
         history.go(-1);

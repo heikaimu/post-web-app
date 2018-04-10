@@ -13,7 +13,7 @@
         <div>
         <div class="page-title">我关注的贴吧</div>
         <ul>
-          <li v-for="item in myFocusList">
+          <li v-for="item in myFocusList" class="theme-item">
             <ThemeItem :data="item"></ThemeItem>
           </li>
         </ul>

@@ -5,31 +5,39 @@
       <router-link slot="right" :to="`/post_page/${details.post_id}`">查看本贴</router-link>
     </mt-header>
     <div class="sub-reply-wrapper">
-      <div class="builder">
-        <div class="ifo">
-          <div class="avatar"><img v-lazy="details.user_head_thumb" alt=""></div>
-          <p class="name" v-text="details.user_nickname"></p>
-          <i v-if="details.user_id===builderId">楼主</i>
-        </div>
-        <ListImg v-if="details.images" :imgList="details.images | jsonParse" :all="true"></ListImg>
-        <TextContent :text="details.content"></TextContent>
-      </div>
-      <ul class="sub-list">
-        <li class="sub-item" v-for="item in subList">
-          <a class="name">{{item.nickname}}<i class="builder" v-if="item.user_id===builderId">楼主</i>:</a>
-          <div class="content" @click="replyThisGay(item.nickname)" :class="{'chose': subReplyId===item.ID}">
-            <TextContent :text="item.content" :inline="true" :size="'small'">
-              <span class="time">{{item.add_time | getPastTime}}</span>
-            </TextContent>
+      <Scroll>
+        <div>
+          <div class="builder">
+            <div class="ifo">
+              <div class="avatar">
+                <img v-if="details.user_head_thumb" v-lazy="details.user_head_thumb" alt="">
+                <i v-else slot="icon" class="fa fa-user fa-lg user-icon"></i>
+              </div>
+              <p class="name" v-text="details.user_nickname"></p>
+              <i v-if="details.user_id===builderId">楼主</i>
+            </div>
+            <ListImg v-if="details.images" :imgList="details.images | jsonParse" :all="true"></ListImg>
+            <TextContent :text="details.content"></TextContent>
           </div>
-        </li>
-      </ul>
+          <ul class="sub-list">
+            <li class="sub-item" v-for="item in subList">
+              <a class="name">{{item.nickname}}<i class="builder" v-if="item.user_id===builderId">楼主</i>:</a>
+              <div class="content" @click="replyThisGay(item.nickname)" :class="{'chose': subReplyId===item.ID}">
+                <TextContent :text="item.content" :inline="true" :size="'small'">
+                  <span class="time">{{item.add_time | getPastTime}}</span>
+                </TextContent>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </Scroll>
     </div>
   </div>
 </template>
 
 <script>
   import TextContent from '@/base/text-content/index';
+  import Scroll from '@/base/scroll/scroll';
   import ListImg from '@/base/list-img/index';
   import { addOne, getList } from '@/api/sub-reply';
   import { getDetails } from '@/api/reply';
@@ -111,7 +119,8 @@
     },
     components: {
       TextContent,
-      ListImg
+      ListImg,
+      Scroll
     }
   }
 </script>
@@ -129,6 +138,7 @@
     .builder{
       border-bottom: 1px solid #e7e7e7;
       padding: 10px;
+      background: #fff;
       .ifo{
         padding: 10px 0;
         display: flex;
@@ -137,8 +147,16 @@
           flex: 0 0 36px;
           width: 36px;
           height: 36px;
+          border: 1px solid #e7e7e7;
+          line-height: 36px;
+          text-align: center;
           border-radius: 50%;
           overflow: hidden;
+          background: #f2f2f2;
+          .user-icon{
+            color: #666;
+            font-size: 18px;
+          }
           img{
             width: 100%;
             height: 100%;
@@ -162,10 +180,9 @@
       right: 0;
       top: 40px;
       bottom: 0;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
       .sub-list{
         padding-top: 10px;
+        background: #fff;
         .sub-item{
           padding: 10px;
           display: flex;

@@ -1,13 +1,61 @@
 <template>
-  <div class="wrapper" ref="wrapper">
-    <slot></slot>
+  <div class="list-wrapper" ref="wrapper">
+    <div class="scroll-content">
+      <div ref="listWrapper">
+        <slot>
+          <ul class="list-content">
+            <li @click="clickItem($event,item)" class="list-item" v-for="item in data">{{item}}</li>
+          </ul>
+        </slot>
+      </div>
+      <slot name="pullup"
+            :pullUpLoad="pullUpLoad"
+            :isPullUpLoad="isPullUpLoad"
+      >
+        <div class="pullup-wrapper" v-if="pullUpLoad">
+          <div class="before-trigger" v-if="!isPullUpLoad">
+            <span>下拉查看更多</span>
+          </div>
+          <div class="after-trigger" v-else>
+            <loading></loading>
+          </div>
+        </div>
+      </slot>
+    </div>
+    <slot name="pulldown"
+          :pullDownRefresh="pullDownRefresh"
+          :pullDownStyle="pullDownStyle"
+          :beforePullDown="beforePullDown"
+          :isPullingDown="isPullingDown"
+          :bubbleY="bubbleY"
+    >
+      <div ref="pulldown" class="pulldown-wrapper" :style="pullDownStyle" v-if="pullDownRefresh">
+        <div class="before-trigger" v-if="beforePullDown">
+          <bubble :y="bubbleY"></bubble>
+        </div>
+        <div class="after-trigger" v-else>
+          <div v-if="isPullingDown" class="loading">
+            <loading></loading>
+          </div>
+          <div v-else><span>数据已更新</span></div>
+        </div>
+      </div>
+    </slot>
   </div>
 </template>
 
 <script>
   import Bscroll from 'better-scroll';
+  import Loading from '@/base/scroll/loading';
+  import Bubble from '@/base/scroll/bubble';
+  import { getRect } from '@/common/js/dom';
   export default {
     props: {
+      // 列表数据
+      data: {
+        type: Array,
+        default: null
+      },
       startY: {
         type: Number,
         default: 0
@@ -22,38 +70,28 @@
         type: Boolean,
         default: true
       },
-      // 是否开启横向滚动
-      scrollX: {
-        type: Boolean,
-        default: false
-      },
       // 是否派发滚动事件
       listenScroll: {
         type: Boolean,
         default: false
       },
-      // 列表数据
-      data: {
-        type: Array,
-        default: null
-      },
-      // 是否派发到底部事件，用于下拉
-      pullup: {
-        type: Boolean,
+      // 上拉加载更多
+      pullUpLoad: {
+        type: null,
         default: false
       },
-      // 是否派发到顶部事件，用于上拉
-      pullup: {
-        type: Boolean,
+      // 下拉刷新
+      pullDownRefresh: {
+        type: null,
         default: false
       },
       // 是否派发列表滚动开始事件
-      beforeScroll: {
+      listenBeforeScroll: {
         type: Boolean,
         default: false
       },
       // 是否派发列表滚动结束事件
-      afterScroll: {
+      listenEndScroll: {
         type: Boolean,
         default: false
       },
@@ -63,6 +101,20 @@
         default: 20
       }
     },
+    data() {
+      return {
+        beforePullDown: true,
+        isRebounding: false,
+        isPullingDown: false,
+        isPullUpLoad: false,
+        pullUpDirty: true,
+        pullDownStyle: '',
+        bubbleY: 0
+      }
+    },
+    created() {
+      this.pullDownInitTop = -50
+    },
     mounted() {
       this.$nextTick(() => {
         this._initScroll();
@@ -71,47 +123,45 @@
     methods: {
       _initScroll() {
         if (!this.$refs.wrapper) return;
-        // 初始化
-        this.scroll = new Bscroll(this.$refs.wrapper, {
-          startY: this.startY,
+        if (this.$refs.listWrapper && (this.pullDownRefresh || this.pullUpLoad)) {
+          this.$refs.listWrapper.style.minHeight = `${getRect(this.$refs.wrapper).height + 1}px`
+        }
+
+        let options = {
           probeType: this.probeType,
           click: this.click,
-          scrollX: this.scrollX
-        });
-        // 派发滚动事件
+          pullDownRefresh: this.pullDownRefresh,
+          pullUpLoad: this.pullUpLoad,
+          startY: this.startY
+        }
+
+        // 初始化
+        this.scroll = new Bscroll(this.$refs.wrapper, options);
+
         if (this.listenScroll) {
           this.scroll.on('scroll', (pos) => {
             this.$emit('scroll', pos);
           });
         }
-        // 到底部事件（下拉加载）
-        if (this.pullup) {
-          this.scroll.on('scrollEnd', () => {
-            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
-              this.$emit('scrollToEnd');
-            }
-          });
-        }
-        // 到顶部事件（上拉刷新）
-        if (this.pulldown) {
-          this.scroll.on('scrollend', (pos) => {
-            alert();
-            if (pos.y > 50) {
-              this.$emit('pulldown');
-            }
-          });
-        }
-        // 是否派发列表滚动开始事件
-        if (this.beforeScroll) {
+
+        if (this.listenBeforeScroll) {
           this.scroll.on('beforeScrollStart', () => {
-            this.$emit('beforeScroll');
+            this.$emit('beforeScrollStart');
           });
         }
-        // 是否派发列表滚动结束事件
-        if (this.afterScroll) {
+
+        if (this.listenEndScroll) {
           this.scroll.on('scrollEnd', (pos) => {
             this.$emit('scrollEnd', pos);
           });
+        }
+
+        if (this.pullDownRefresh) {
+          this._initPullDownRefresh();
+        }
+
+        if (this.pullUpLoad) {
+          this._initPullUpLoad();
         }
       },
       disable() {
@@ -133,23 +183,128 @@
       scrollToElement() {
         // 代理better-scroll的scrollElement方法
         this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
+      },
+      destroy() {
+        this.scroll.destroy()
+      },
+      forceUpdate(dirty) {
+        if (this.pullDownRefresh && this.isPullingDown) {
+          this.isPullingDown = false
+          this._reboundPullDown().then(() => {
+            this._afterPullDown()
+          })
+        } else if (this.pullUpLoad && this.isPullUpLoad) {
+          this.isPullUpLoad = false
+          this.scroll.finishPullUp()
+          this.pullUpDirty = dirty
+          this.refresh()
+        } else {
+          this.refresh()
+        }
+      },
+      _initPullDownRefresh() {
+        this.scroll.on('pullingDown', () => {
+          this.beforePullDown = false
+          this.isPullingDown = true
+          this.$emit('pullingDown')
+        })
+
+        this.scroll.on('scroll', (pos) => {
+          if (!this.pullDownRefresh) {
+            return
+          }
+          if (this.beforePullDown) {
+            this.bubbleY = Math.max(0, pos.y + this.pullDownInitTop)
+            this.pullDownStyle = `top:${Math.min(pos.y + this.pullDownInitTop, 10)}px`
+          } else {
+            this.bubbleY = 0
+          }
+          if (this.isRebounding) {
+            this.pullDownStyle = `top:${10 - (this.pullDownRefresh.stop - pos.y)}px`
+          }
+        })
+      },
+      _initPullUpLoad() {
+        this.scroll.on('pullingUp', () => {
+          this.isPullUpLoad = true;
+          this.$emit('pullingUp');
+        })
+      },
+      _reboundPullDown() {
+        const {stopTime = 600} = this.pullDownRefresh;
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.isRebounding = true;
+            this.scroll.finishPullDown();
+            resolve();
+          }, stopTime);
+        })
+      },
+      _afterPullDown() {
+        setTimeout(() => {
+          this.pullDownStyle = `top:${this.pullDownInitTop}px`;
+          this.beforePullDown = true;
+          this.isRebounding = false;
+          this.refresh();
+        }, this.scroll.options.bounceTime);
       }
     },
     watch: {
       // 监听数据变化，延迟refreshDelay时间后调用refresh方法
       data() {
         setTimeout(() => {
-          this.refresh();
+          this.forceUpdate(true);
         }, this.refreshDelay);
       }
+    },
+    components: {
+      Bubble,
+      Loading
     }
   }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .wrapper{
+<style scoped lang="scss">
+  .list-wrapper{
+    position: relative;
     height: 100%;
+    /*position: absolute*/
+    /*left: 0*/
+    /*top: 0*/
+    /*right: 0*/
+    /*bottom: 0*/
     overflow: hidden;
+    background: #f2f2f2;
+    .scroll-content{
+      position: relative;
+      z-index: 1;
+    }
+    .list-content{
+      position: relative;
+      z-index: 10;
+      background: #fff;
+    }
+
+  }
+
+  .pulldown-wrapper{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all;
+    .after-trigger{
+    }
+  }
+
+  .pullup-wrapper{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 0;
   }
 </style>

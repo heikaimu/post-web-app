@@ -6,12 +6,19 @@
       </router-link>
     </mt-header>
     <div class="new-message-wrapper">
-      <NewMessageItem v-for="item in newMessageList" :data="item"></NewMessageItem>
+      <Scroll>
+        <ul>
+          <li v-for="item in newMessageList">
+            <NewMessageItem :data="item"></NewMessageItem>
+          </li>
+        </ul>
+      </Scroll>
     </div>
   </div>
 </template>
 
 <script>
+  import Scroll from '@/base/scroll/scroll';
   import { mapGetters } from 'vuex';
   import { getList } from '@/api/new-message';
   import NewMessageItem from '@/components/new-message/item';
@@ -42,7 +49,8 @@
       }
     },
     components: {
-      NewMessageItem
+      NewMessageItem,
+      Scroll
     }
   }
 </script>
@@ -61,10 +69,6 @@
       right: 0;
       top: 40px;
       bottom: 0;
-      margin-top: -1px;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
-      background-color: #f2f2f2;
     }
   }
 </style>

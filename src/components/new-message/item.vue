@@ -2,7 +2,10 @@
   <div class="reply-item" @click="checkDetails">
     <div v-if="isReply">
       <div class="reply-author">
-        <div class="avatar"><img v-lazy="replyIfo.user_head_thumb" alt=""></div>
+        <div class="avatar">
+          <img v-if="replyIfo.user_head_thumb" v-lazy="replyIfo.user_head_thumb" alt="">
+          <i v-else slot="icon" class="fa fa-user fa-lg user-icon"></i>
+        </div>
         <div class="ifo">
           <p class="name">{{replyIfo.user_nickname}}</p>
           <p class="add-time">{{replyIfo.add_time | getPastTime}}</p>
@@ -98,10 +101,15 @@
       .avatar{
         width: 36px;
         height: 36px;
+        border: 1px solid #e7e7e7;
+        line-height: 36px;
+        text-align: center;
         border-radius: 50%;
-        border: 1px solid #ddd;
         overflow: hidden;
-        background: #666;
+        background: #f2f2f2;
+        .user-icon{
+          color: #666;
+        }
         img{
           max-width: 100%;
           max-height: 100%;

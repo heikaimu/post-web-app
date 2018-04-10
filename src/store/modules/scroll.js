@@ -16,6 +16,11 @@ const state = {
       name: 'reply',
       pageId: 1,
       position: 0
+    },
+    {
+      name: 'myPost',
+      pageId: 1,
+      position: 0
     }
   ]
 }
