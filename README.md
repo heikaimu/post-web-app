@@ -5,7 +5,9 @@
 
 [新版本项目演示地址](http://heikaimu.top:5000/)
 
-新版本功能描述帖子地址(http://heikaimu.top:5000/#/post_page/66)
+[新版本功能描述帖子地址](http://heikaimu.top:5000/#/post_page/66)
+
+[服务端代码地址](https://github.com/heikaimu/post-server)
 
 ## 设置公共路由拦截器
 我的，发布，关注，新增主题等功能及页面需要我是登录状态才能操作，
