@@ -34,7 +34,7 @@ export const getList = (data) => {
      * }
  * api: /reply/deleteOne
  */
-export const deleteOne = (data) => {
+export const deleteFloor = (data) => {
   return requestPost(`${API_CONFIG}/deleteOne`, data);
 }
 

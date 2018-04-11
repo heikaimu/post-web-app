@@ -6,24 +6,12 @@
       </div>
       <div class="img-item blank" v-if="imgList.length===2"></div>
     </div>
-    <transition
-      v-on:before-enter="beforeEnter"
-      v-on:enter="enter"
-      v-on:leave="leave"
-      v-bind:css="false"
-    >
-      <SwiperZoom
-        v-if="showSwiperZoom"
-        :index="currentIndex"
-        :data="imgList"
-        @closeSwiper="showSwiperZoom=false"
-      ></SwiperZoom>
-    </transition>
   </div>
 </template>
 
 <script>
   import SwiperZoom from '@/base/swiper/zoom';
+  import { mapGetters } from 'vuex';
     export default {
       props: {
         imgList: {
@@ -33,45 +21,38 @@
       },
       data() {
         return {
-          showSwiperZoom: false,
-          enterX: 0,
-          enterY: 0,
-          iHeight: 'auto',
-          currentIndex: ''
+          iHeight: 'auto'
         }
+      },
+      computed: {
+        ...mapGetters([
+          'swiperPictureIfo'
+        ])
       },
       mounted() {
         if (!this.all) {
           const boxWidth = this.$refs.imgListWrapper.clientWidth;
           this.iHeight = boxWidth / 3;
+        } else {
+          this.iHeight = 'auto';
         }
       },
       methods: {
         openSwiper(el, index) {
           const wWidth = document.body.clientWidth;
           const wHeight = 750;
-          this.enterX = - (wWidth / 2 - el.clientX);
-          this.enterY = - (wHeight / 2 - el.clientY);
-//          console.log(el.offsetX)
-//          console.log(el.offsetY)
-//          console.log(el);
-          setTimeout(() => {
-            this.currentIndex = index;
-            this.showSwiperZoom = true;
-          }, 100)
-        },
-        beforeEnter (el) {
-          Velocity(el, { translateX: `${this.enterX}px`, translateY: `${this.enterY}px`, scale: 0.1, opacity: 0}, { duration: 0 })
-        },
-        enter (el, done) {
-          Velocity(el, { translateX: 0, translateY: 0, scale: 1, opacity: 1}, { duration: 300 })
-        },
-        leave (el, done) {
-          Velocity(el, { translateX: `${this.enterX}px`, translateY: `${this.enterY}px`, scale: 0.1, opacity: 0 }, { duration: 300 })
+          const enterX = - (wWidth / 2 - el.clientX);
+          const enterY = - (wHeight / 2 - el.clientY);
+          const swiperPictureIfo = {
+            index: index,
+            list: this.imgList,
+            x: enterX,
+            y: enterY,
+            show: true
+          }
+          this.$store.commit('SET_SWIPER_PICTURE', swiperPictureIfo);
+          console.log(this.swiperPictureIfo);
         }
-      },
-      components: {
-        SwiperZoom
       }
     }
 </script>
@@ -88,7 +69,7 @@
       justify-content: center;
       flex: 1;
       margin: 0 2px;
-      background: #444;
+      background: #fff;
       overflow: hidden;
       img{
         &.show{
@@ -111,7 +92,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #444;
+      background: #fff;
       margin-bottom: 10px;
       img{
         max-width: 100%;

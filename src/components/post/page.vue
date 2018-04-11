@@ -1,7 +1,8 @@
 <template>
   <div class="post-page-container">
     <mt-header title="" style="background: #333">
-        <div slot="left" @click="handleBack"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
+      <div slot="left" @click="handleBack"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
+      <div v-if="loginIfo.isLogin && loginIfo.data.ID===details.user_id" slot="right" @click="handleDelete"><i slot="icon" class="fa fa-trash-o fa-lg"></i></div>
     </mt-header>
     <div class="reply-list-container">
       <Scroll
@@ -23,6 +24,7 @@
                 :data="item"
                 :index="index"
                 :builderId="details.user_id"
+                @deleteFloor="deleteFloor"
               ></ReplyItem>
             </li>
           </ul>
@@ -42,9 +44,9 @@
   import PostDetails from '@/components/post/details';
   import ReplyItem from '@/components/reply/item';
   import ReplyMessage from '@/base/reply-message/index';
-  import { getDetails } from '@/api/post';
-  import { getList, addOne } from '@/api/reply';
-  import { Indicator, Toast } from 'mint-ui';
+  import { getDetails, deleteOne } from '@/api/post';
+  import { getList, addOne, deleteFloor } from '@/api/reply';
+  import { Indicator, Toast, MessageBox } from 'mint-ui';
   import { mapGetters } from 'vuex';
   import store from '@/store';
   export default {
@@ -77,6 +79,7 @@
     },
     computed: {
       ...mapGetters([
+        'loginIfo',
         'scrollIfo'
       ])
     },
@@ -169,6 +172,55 @@
       },
       handleBack() {
         history.go(-1);
+      },
+      // 删除改帖子
+      handleDelete() {
+        const _this = this;
+        MessageBox.confirm('你真的要删除当前帖子吗?').then(action => {
+          _this._delete();
+        });
+      },
+      async _delete() {
+        Indicator.open('删除中...');
+        const params = {
+          postId: this.details.ID
+        };
+        const { state, message } = await deleteOne(params);
+        Indicator.close();
+        Toast({
+          message: message,
+          position: 'bottom',
+          duration: 2000
+        });
+        if (state) {
+          this.$router.back();
+        }
+      },
+      // 删除某一楼
+      deleteFloor(id) {
+        const _this = this;
+        MessageBox.confirm('你真的要删除当前楼层吗?').then(action => {
+          _this._deleteFloor(id);
+        });
+      },
+      async _deleteFloor(id) {
+        Indicator.open('删除中...');
+        const params = {
+          replyId: id
+        };
+        const { state, message } = await deleteFloor(params);
+        Indicator.close();
+        if (state) {
+          this.list = [];
+          this.pageId = 1;
+          this.isPullUpLoad = true;
+          this._getPostList();
+        }
+        Toast({
+          message: message,
+          position: 'bottom',
+          duration: 2000
+        });
       }
     },
     components: {

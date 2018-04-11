@@ -9,6 +9,9 @@
           <p class="name">{{data.user_nickname}} <i v-if="data.user_id===builderId">楼主</i></p>
           <p class="add-time"><i>第{{data.building_num}}楼</i> {{data.add_time | getPastTime}}</p>
         </div>
+        <div v-if="loginIfo.isLogin && (loginIfo.data.ID===builderId || loginIfo.data.ID===data.user_id)" class="delete-icon" @click="handleDelete">
+          <i slot="icon" class="fa fa-trash-o fa-lg"></i>
+        </div>
       </div>
       <div class="reply-content">
         <div @click="openSubReply">
@@ -31,11 +34,20 @@
 <script>
   import TextContent from '@/base/text-content/index';
   import ListImg from '@/base/list-img/index';
+  import { mapGetters } from 'vuex';
   export default {
     props: ['index', 'data', 'builderId'],
+    computed: {
+      ...mapGetters([
+        'loginIfo'
+      ])
+    },
     methods: {
       openSubReply() {
         this.$router.push(`/sub_reply/${this.data.ID}/${this.index}/${this.builderId}`);
+      },
+      handleDelete() {
+        this.$emit('deleteFloor', this.data.ID);
       }
     },
     components: {
@@ -55,6 +67,7 @@
       display: flex;
       height: 60px;
       align-items: center;
+      position: relative;
       .avatar{
         width: 36px;
         height: 36px;
@@ -97,6 +110,14 @@
           }
         }
 
+      }
+      .delete-icon{
+        padding: 5px;
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        font-size: 12px;
+        color: #FF3030;
       }
     }
     .reply-content{

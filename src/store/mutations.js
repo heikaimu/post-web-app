@@ -1,7 +1,16 @@
 import * as types from './mutation-types';
 
+const defaultSwiperPictureIfo = {
+  index: 0,
+  list: [],
+  x: 0,
+  y: 0,
+  show: false
+}
+
 export const state = {
-  loginIfo: JSON.parse(sessionStorage.getItem('loginIfo') || '{}')
+  loginIfo: JSON.parse(sessionStorage.getItem('loginIfo') || '{}'),
+  swiperPictureIfo: defaultSwiperPictureIfo
 }
 
 export const mutations = {
@@ -24,5 +33,9 @@ export const mutations = {
   [types.SET_BACKGROUND](state, background) {
     state.loginIfo.data.background = background;
     sessionStorage.setItem('loginIfo', JSON.stringify(state.loginIfo));
+  },
+  [types.SET_SWIPER_PICTURE](state, swiperPictureIfo) {
+    state.swiperPictureIfo = swiperPictureIfo;
+    sessionStorage.setItem('swiperPictureIfo', JSON.stringify(state.swiperPictureIfo));
   }
 }

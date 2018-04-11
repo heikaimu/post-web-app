@@ -1,10 +1,12 @@
 <template>
     <div class="main-page-container">
+      <!--主体内容-->
       <div class="main-container">
         <transition name="slide-fade" mode="in-out">
           <router-view/>
         </transition>
       </div>
+      <!--选项卡-->
       <mt-tabbar v-model="selected">
         <mt-tab-item id="recommend">
           <i slot="icon" class="fa fa-home fa-lg"></i>

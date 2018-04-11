@@ -16,7 +16,7 @@
         <!--<TextContent :text="data.content"></TextContent>-->
       <!--</div>-->
       <ListImg v-if="data.images" :imgList="data.images | jsonParse"></ListImg>
-      <div class="god-reply" v-if="data.god_reply">
+      <div class="god-reply" v-if="data.god_reply" @click="openPage(data.ID)">
         <TextContent :text="data.god_reply.content"></TextContent>
       </div>
       <div class="other-icon">

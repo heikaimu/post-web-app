@@ -1,6 +1,6 @@
 <template>
     <div class="sub-reply-container">
-      <mt-header :title="`${index+1}楼`" style="background: #333">
+      <mt-header :title="`${details.building_num}楼`" style="background: #333">
         <div slot="left" @click="closeSubReply"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
       </mt-header>
       <div class="sub-reply-wrapper">
@@ -53,7 +53,6 @@
         return {
           details: {},
           subList: [],
-          index: 0,
           builderId: 0
         }
       },
@@ -64,7 +63,6 @@
       },
       methods: {
         init() {
-          this.index = parseInt(this.$route.params.index);
           this.builderId = parseInt(this.$route.params.builderId);
         },
         // 获取详情

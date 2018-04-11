@@ -2,7 +2,7 @@
     <div class="welcome-wrapper">
       <div class="ad-wrapper">
         <div class="ad-avatar" :style="{backgroundImage: `url(${adImg})`}"></div>
-        <span class="time" @click="$router.push('/main');">{{time}} 跳过</span>
+        <span class="time" @click="goToRecommed">{{time}} 跳过</span>
       </div>
       <div class="welcome-words">
         <p>MINI贴吧</p>
@@ -27,6 +27,12 @@
           }
           this.time -= 1;
         }, 1000);
+      },
+      methods: {
+        goToRecommed() {
+          clearInterval(this.timer);
+          this.$router.push('/main');
+        }
       }
     }
 </script>
