@@ -2,7 +2,7 @@
   <div>
     <div :class="{'img-box-type1': !all, 'img-box-type2': all}" ref="imgListWrapper">
       <div class="img-item" :style="{height: `${iHeight}px`}" v-for="(item, index) in imgList" v-if="all ? true : index < 3" @click="openSwiper($event, index)">
-        <img v-lazy="item" alt="" :class="{show: item}">
+        <img :src="item" alt="" @load="imageLoaded" :class="{show: item}">
       </div>
       <div class="img-item blank" v-if="imgList.length===2"></div>
     </div>
@@ -21,7 +21,8 @@
       },
       data() {
         return {
-          iHeight: 'auto'
+          iHeight: 'auto',
+          imgNum: 0
         }
       },
       computed: {
@@ -51,7 +52,12 @@
             show: true
           }
           this.$store.commit('SET_SWIPER_PICTURE', swiperPictureIfo);
-          console.log(this.swiperPictureIfo);
+        },
+        imageLoaded() {
+          this.imgNum += 1;
+          if (this.imgNum >= this.imgList.length) {
+            this.$emit('imageLoaded', '');
+          }
         }
       }
     }

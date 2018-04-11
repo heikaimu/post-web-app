@@ -17,7 +17,7 @@
         <div @click="openSubReply">
           <TextContent :text="data.content"></TextContent>
         </div>
-        <ListImg v-if="data.images" :imgList="data.images | jsonParse" :all="true"></ListImg>
+        <ListImg v-if="data.images" :imgList="data.images | jsonParse" :all="true" @imageLoaded="imageLoaded"></ListImg>
         <div v-if="data.sub_reply && data.sub_reply_count!=0" class="sub-reply-wrapper" @click="openSubReply">
           <div class="sub-item" v-for="i in data.sub_reply">
             <a class="name" v-text="`${i.nickname}:`"></a>
@@ -48,6 +48,9 @@
       },
       handleDelete() {
         this.$emit('deleteFloor', this.data.ID);
+      },
+      imageLoaded() {
+        this.$emit('imageLoaded', '');
       }
     },
     components: {

@@ -25,6 +25,7 @@
                 :index="index"
                 :builderId="details.user_id"
                 @deleteFloor="deleteFloor"
+                @imageLoaded="imageLoaded"
               ></ReplyItem>
             </li>
           </ul>
@@ -151,6 +152,9 @@
           position: this.position
         }
         this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
+      },
+      imageLoaded() {
+        this.$refs.scroll.forceUpdate();
       },
       // 保存回复
       async saveMessage(params) {

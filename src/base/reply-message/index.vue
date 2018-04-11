@@ -4,15 +4,15 @@
     <transition name="slide-fade">
       <div class="content" v-if="showContent">
         <mt-header title="" style="background: #333">
-          <div slot="left" @click="showContent=false"><i slot="icon" class="fa fa-close fa-lg"></i></div>
+          <div slot="left" @click="closeMessageBox"><i slot="icon" class="fa fa-close fa-lg"></i></div>
           <div slot="right" @click="saveMessage">发布</div>
         </mt-header>
         <div class="form-wrapper">
           <div class="form-item" v-if="showTitle">
-            <input type="text" placeholder="标题..." v-model="title">
+            <input type="text" placeholder="标题..." v-model="title" ref="title" v-focus="showTitle && showContent">
           </div>
           <div class="form-item">
-            <textarea name="" id="" cols="30" rows="10" placeholder="我想说点什么..." v-model="content"></textarea>
+            <textarea name="" id="" cols="30" rows="10" placeholder="我想说点什么..." v-model="content" ref="content" v-focus="!showTitle && showContent"></textarea>
           </div>
           <PictureWall :imgList="imgList"></PictureWall>
         </div>
@@ -50,7 +50,8 @@
         showFace: false,
         title: '',
         content: '',
-        imgList: []
+        imgList: [],
+        timer: ''
       }
     },
     computed: {
@@ -63,8 +64,13 @@
       openReplyMessage() {
         this.title = '';
         this.content = '';
+        this.imgList = [];
+        this.showFace = false;
         if (this.loginIfo.isLogin) {
           this.showContent = true;
+          this.timer = setInterval(function(){
+            document.body.scrollTop = document.body.scrollHeight;
+          }, 100)
         } else {
           this.$router.push({
             path: '/login',
@@ -94,7 +100,13 @@
           imgList: JSON.stringify(this.imgList)
         }
         this.showContent = false;
+        clearInterval(this.timer);
         this.$emit('saveMessage', params);
+      },
+      // 关闭
+      closeMessageBox() {
+        this.showContent = false;
+        clearInterval(this.timer);
       }
     },
     components: {
