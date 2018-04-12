@@ -8,7 +8,6 @@ import router from './router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import './common/scss/reset.scss';
-import './common/font-awesome-4.7.0/css/font-awesome.min.css';
 import * as filters from './filter';
 
 Vue.config.productionTip = false;
