@@ -49,7 +49,7 @@
           account: this.account,
           password: this.pwd
         }
-        Indicator.open('注册成功，登录中...');
+        Indicator.open('登录中...');
         const { state, message } = await login(params);
         if (state) {
           this._saveCurrentUser();

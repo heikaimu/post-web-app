@@ -15,7 +15,7 @@
       <!--<div class="content" @click="openPage(data.ID)">-->
         <!--<TextContent :text="data.content"></TextContent>-->
       <!--</div>-->
-      <ListImg v-if="data.images" :imgList="data.images | jsonParse"></ListImg>
+      <ListImg v-if="data.images" :imgList="data.images | jsonParse" @imageLoaded="imageLoaded"></ListImg>
       <div class="god-reply" v-if="data.god_reply" @click="openPage(data.ID)">
         <TextContent :text="data.god_reply.content"></TextContent>
       </div>
@@ -42,6 +42,9 @@
       methods: {
         openPage(id) {
           this.$router.push(`/post_page/${id}`)
+        },
+        imageLoaded() {
+          this.$emit('imageLoaded', '');
         }
       },
       components: {

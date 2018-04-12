@@ -77,6 +77,29 @@
     transform: translateX(10px);
     opacity: 0;
   }
+
+  .slide-up-enter-active {
+    transition: all .2s ease;
+  }
+  .slide-up-leave-active {
+    transition: all .2s ease;
+  }
+  .slide-up-enter, .slide-up-leave-to{
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  .slide-down-enter-active {
+    transition: all .2s ease;
+  }
+  .slide-down-leave-active {
+    transition: all .2s ease;
+  }
+  .slide-down-enter, .slide-down-leave-to{
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
   .mint-tab-item-icon{
     margin: 4px auto 0px;
   }

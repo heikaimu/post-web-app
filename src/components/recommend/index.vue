@@ -1,11 +1,13 @@
 <template>
   <div class="recommend-page-container">
-    <mt-header title="新动态" style="background: #333" fixed v-if="showHeaderAndBar">
+    <transition name="slide-up">
+    <mt-header title="新动态" style="background: #333; z-index: 2333;" fixed v-if="movingDirectionY==-1">
       <router-link to="/new_message" slot="right" v-if="this.loginIfo.isLogin">
         <NewMessageIcon></NewMessageIcon>
       </router-link>
     </mt-header>
-    <div class="recommend-list-container">
+    </transition>
+    <div class="recommend-list-container" :style="{top: movingDirectionY==-1 ? '40px' : 0}">
       <Scroll
         ref="scroll"
         :data="list"
@@ -13,13 +15,15 @@
         :pullUpLoad="isPullUpLoad"
         :pullDownRefresh="isPullDownRefresh"
         :listenEndScroll="true"
+        :listenScroll="true"
         @pullingUp="loadMore"
         @pullingDown="onPullingDown"
         @scrollEnd="scrollEnd"
+        @scroll="scroll"
       >
         <ul>
           <li v-for="item in list" class="page-infinite-listitem">
-            <PostItem :data="item" showBarName="true"></PostItem>
+            <PostItem :data="item" showBarName="true" @imageLoaded="imageLoaded"></PostItem>
           </li>
         </ul>
       </Scroll>
@@ -43,14 +47,14 @@
           componentName: 'recommend',
           position: 0,
           isPullUpLoad: true,
-          isPullDownRefresh: true,
-          showHeaderAndBar: true
+          isPullDownRefresh: true
         }
       },
       computed: {
         ...mapGetters([
           'loginIfo',
-          'scrollIfo'
+          'scrollIfo',
+          'movingDirectionY'
         ])
       },
       created() {
@@ -59,6 +63,7 @@
       methods: {
         // 初始化数据，主要是获取位置以及离开时的页码方便给pageSize赋值
         pageInit() {
+          this.$store.commit('SET_MOVINGDIRECTIONY', -1);
           const indexOfComponent = this.scrollIfo.findIndex((item) => {
             return item.name === this.componentName;
           });
@@ -110,6 +115,14 @@
             position: this.position
           }
           this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
+        },
+        // 监听滚动
+        scroll(pos) {
+          this.$store.commit('SET_MOVINGDIRECTIONY', pos.movingDirectionY);
+        },
+        // 图片加载完成
+        imageLoaded() {
+          this.$refs.scroll.forceUpdate();
         }
       },
       components: {
@@ -135,10 +148,10 @@
       }
     }
     .recommend-list-container {
+      transition: .4s;
       position: absolute;
       left: 0;
       right: 0;
-      top: 40px;
       bottom: 0;
     }
   }

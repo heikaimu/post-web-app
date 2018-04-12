@@ -10,7 +10,8 @@ const defaultSwiperPictureIfo = {
 
 export const state = {
   loginIfo: JSON.parse(sessionStorage.getItem('loginIfo') || '{}'),
-  swiperPictureIfo: defaultSwiperPictureIfo
+  swiperPictureIfo: defaultSwiperPictureIfo,
+  movingDirectionY: 1
 }
 
 export const mutations = {
@@ -37,5 +38,9 @@ export const mutations = {
   [types.SET_SWIPER_PICTURE](state, swiperPictureIfo) {
     state.swiperPictureIfo = swiperPictureIfo;
     sessionStorage.setItem('swiperPictureIfo', JSON.stringify(state.swiperPictureIfo));
+  },
+  [types.SET_MOVINGDIRECTIONY](state, movingDirectionY) {
+    state.movingDirectionY = movingDirectionY;
+    sessionStorage.setItem('movingDirectionY', JSON.stringify(state.movingDirectionY));
   }
 }

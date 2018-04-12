@@ -1,10 +1,12 @@
 <template>
   <div class="post-page-container">
-    <mt-header title="" style="background: #333">
+    <transition name="slide-up">
+    <mt-header title="" style="background: #333; z-index: 233;" v-if="movingDirectionY==-1">
       <div slot="left" @click="handleBack"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
       <div v-if="loginIfo.isLogin && loginIfo.data.ID===details.user_id" slot="right" @click="handleDelete"><i slot="icon" class="fa fa-trash-o fa-lg"></i></div>
     </mt-header>
-    <div class="reply-list-container">
+    </transition>
+    <div class="reply-list-container" :style="{top: movingDirectionY==-1 ? '40px' : 0}">
       <Scroll
         ref="scroll"
         :data="list"
@@ -12,9 +14,11 @@
         :pullUpLoad="isPullUpLoad"
         :pullDownRefresh="isPullDownRefresh"
         :listenEndScroll="true"
+        :listenScroll="true"
         @pullingUp="loadMore"
         @pullingDown="onPullingDown"
         @scrollEnd="scrollEnd"
+        @scroll="scroll"
       >
         <div>
           <PostDetails :data="details"></PostDetails>
@@ -81,7 +85,8 @@
     computed: {
       ...mapGetters([
         'loginIfo',
-        'scrollIfo'
+        'scrollIfo',
+        'movingDirectionY'
       ])
     },
     created() {
@@ -100,6 +105,7 @@
       },
       // 初始化数据，主要是获取位置以及离开时的页码方便给pageSize赋值
       pageInit() {
+        this.$store.commit('SET_MOVINGDIRECTIONY', -1);
         const indexOfComponent = this.scrollIfo.findIndex((item) => {
           return item.name === this.componentName;
         });
@@ -152,6 +158,10 @@
           position: this.position
         }
         this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
+      },
+      // 监听滚动
+      scroll(pos) {
+        this.$store.commit('SET_MOVINGDIRECTIONY', pos.movingDirectionY);
       },
       imageLoaded() {
         this.$refs.scroll.forceUpdate();
@@ -255,9 +265,9 @@
     z-index: 23;
     .reply-list-container {
       position: absolute;
+      transition: .4s;
       left: 0;
       right: 0;
-      top: 40px;
       bottom: 50px;
       background-color: #f2f2f2;
     }

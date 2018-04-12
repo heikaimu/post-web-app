@@ -21,12 +21,19 @@
 
 <script>
   import { getList } from '@/api/theme';
+  import debounce from '@/common/js/debounce';
     export default {
       data() {
         return {
           keyword: '',
-          searchResult: []
+          searchResult: [],
+          timer: 4
         }
+      },
+      created() {
+        this.$watch('keyword', debounce(() => {
+          this._getList(this.keyword);
+        }, 300));
       },
       methods: {
         async _getList(keyword) {
@@ -42,7 +49,7 @@
       watch: {
         keyword() {
           if (this.keyword !== '') {
-            this._getList(this.keyword);
+
           }
         }
       }

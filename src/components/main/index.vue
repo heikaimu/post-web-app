@@ -7,7 +7,8 @@
         </transition>
       </div>
       <!--选项卡-->
-      <mt-tabbar v-model="selected">
+      <transition name="slide-down">
+      <mt-tabbar v-model="selected" v-if="movingDirectionY==-1" fixed>
         <mt-tab-item id="recommend">
           <i slot="icon" class="fa fa-home fa-lg"></i>
           推荐
@@ -21,6 +22,7 @@
           我的
         </mt-tab-item>
       </mt-tabbar>
+      </transition>
     </div>
 </template>
 
@@ -34,7 +36,8 @@
       },
       computed: {
         ...mapGetters([
-          'loginIfo'
+          'loginIfo',
+          'movingDirectionY'
         ])
       },
       mounted() {
@@ -85,7 +88,7 @@
       left: 0;
       top: 0;
       right: 0;
-      bottom: 55px;
+      bottom: 0;
       background: #fff;
     }
   }

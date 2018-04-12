@@ -140,6 +140,7 @@
 
         if (this.listenScroll) {
           this.scroll.on('scroll', (pos) => {
+            pos.movingDirectionY = this.scroll.movingDirectionY;
             this.$emit('scroll', pos);
           });
         }

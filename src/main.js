@@ -8,6 +8,7 @@ import router from './router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import './common/scss/reset.scss';
+import './common/font-awesome-4.7.0/css/font-awesome.min.css';
 import * as filters from './filter';
 
 Vue.config.productionTip = false;
@@ -18,7 +19,7 @@ import 'mint-ui/lib/style.css';
 Vue.use(Mint);
 
 /* 使用axios获取数据 */
-// axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
 Vue.use(VueAxios, axios);
 
@@ -45,15 +46,13 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
     if (store.state.loginIfo.isLogin) {  // 通过vuex 判断是否已经登录
       next();
-    }
-    else {
+    } else {
       next({
         path: '/login',
         query: { redirect: to.fullPath }  // 将跳转的路由path作为参数，登录成功后跳转到该路由
       })
     }
-  }
-  else {
+  } else {
     next();
   }
 });

@@ -1,9 +1,11 @@
 <template>
   <div class="post-list-page-container">
-    <mt-header :title="details.name" style="background: #333">
+    <transition name="slide-up">
+    <mt-header :title="details.name" style="background: #333; z-index: 233;" v-if="movingDirectionY==-1">
         <div @click="handleBack" slot="left"><i slot="icon" class="fa fa-angle-left fa-lg"></i></div>
     </mt-header>
-    <div class="post-list-container">
+    </transition>
+    <div class="post-list-container" :style="{top: movingDirectionY==-1 ? '40px' : 0}">
       <Scroll
         ref="scroll"
         :data="list"
@@ -11,9 +13,11 @@
         :pullUpLoad="isPullUpLoad"
         :pullDownRefresh="isPullDownRefresh"
         :listenEndScroll="true"
+        :listenScroll="true"
         @pullingUp="loadMore"
         @pullingDown="onPullingDown"
         @scrollEnd="scrollEnd"
+        @scroll="scroll"
       >
         <div>
         <ThemeDetails
@@ -22,7 +26,7 @@
         ></ThemeDetails>
         <ul class="page-infinite-list">
           <li v-for="item in list" class="page-infinite-listitem">
-            <PostItem :data="item"></PostItem>
+            <PostItem :data="item" @imageLoaded="imageLoaded"></PostItem>
           </li>
         </ul>
         </div>
@@ -76,7 +80,8 @@
     },
     computed: {
       ...mapGetters([
-        'scrollIfo'
+        'scrollIfo',
+        'movingDirectionY'
       ])
     },
     created() {
@@ -97,6 +102,7 @@
       },
       // 初始化数据，主要是获取位置以及离开时的页码方便给pageSize赋值
       pageInit() {
+        this.$store.commit('SET_MOVINGDIRECTIONY', -1);
         const indexOfComponent = this.scrollIfo.findIndex((item) => {
           return item.name === this.componentName;
         });
@@ -150,6 +156,10 @@
         }
         this.$store.commit('SET_PAGE_SCROLL', scrollIfo);
       },
+      // 监听滚动
+      scroll(pos) {
+        this.$store.commit('SET_MOVINGDIRECTIONY', pos.movingDirectionY);
+      },
       // 发帖
       async saveMessage(params) {
         params.themeId = this.$route.params.id;
@@ -167,6 +177,9 @@
           position: 'bottom',
           duration: 2000
         });
+      },
+      imageLoaded() {
+        this.$refs.scroll.forceUpdate();
       },
       handleBack() {
         history.go(-1);
@@ -197,9 +210,9 @@
     }
     .post-list-container {
       position: absolute;
+      transition: .4s;
       left: 0;
       right: 0;
-      top: 40px;
       bottom: 50px;
       background-color: #f2f2f2;
     }
