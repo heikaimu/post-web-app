@@ -40,9 +40,13 @@
         ])
       },
       mounted() {
+        this.pageInit();
         this._getList();
       },
       methods: {
+        pageInit() {
+          this.$store.commit('SET_MOVINGDIRECTIONY', -1);
+        },
         async _getList() {
           const { state, message, data } = await focusList({});
           if (state) {

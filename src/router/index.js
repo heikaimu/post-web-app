@@ -25,6 +25,8 @@ const BackgroundComponent = asyncComponent('user/background');
 const NewMessageComponent = asyncComponent('new-message/index');
 const NewMessageDetailsComponent = asyncComponent('new-message/details');
 
+const TestMessage = asyncComponent('test/message');
+
 Vue.use(Router)
 
 export default new Router({
@@ -113,6 +115,10 @@ export default new Router({
     {
       path: '/new_message_details/:id/:builderId/:subReplyId',
       component: NewMessageDetailsComponent
+    },
+    {
+      path: '/test_message',
+      component: TestMessage
     }
   ]
 })

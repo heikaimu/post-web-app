@@ -4,12 +4,15 @@
         <div class="avatar" :style="{background: `url(${i}) no-repeat center center / cover`}"></div>
         <div class="icon" @click="removePicture(index)"><i slot="icon" class="fa fa-close fa-lg"></i></div>
       </div>
+      <div class="item" v-if="loading">
+        <div class="avatar loading"><img src="./loading.gif"></div>
+      </div>
     </div>
 </template>
 
 <script>
     export default {
-      props: ['imgList'],
+      props: ['imgList', 'loading'],
       data() {
         return {
           avatar: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1521537850349&di=557dffc888a1dafcb1d813050c667a21&imgtype=0&src=http%3A%2F%2Fimg2.dwstatic.com%2Ftv%2F1711%2F373544133017%2F1509588979577.JPG'
@@ -40,6 +43,16 @@
       .avatar{
         width: 80px;
         height: 80px;
+        &.loading{
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          img{
+            width: 30px;
+            height: 30px;
+            display: block;
+          }
+        }
       }
       .icon{
         position: absolute;

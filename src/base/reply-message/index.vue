@@ -14,7 +14,7 @@
           <div class="form-item">
             <textarea name="" id="" cols="30" rows="10" placeholder="我想说点什么..." v-model="content" ref="content" v-focus="!showTitle && showContent"></textarea>
           </div>
-          <PictureWall :imgList="imgList"></PictureWall>
+          <PictureWall :imgList="imgList" :loading="uploading"></PictureWall>
         </div>
         <div class="function-btn-wrapper">
           <div class="icon" @click="showFace=!showFace" :class="{'check': showFace}"><i slot="icon" class="fa fa-smile-o fa-lg"></i></div>
@@ -33,7 +33,7 @@
   import PictureWall from '@/base/reply-message/picture-wall';
   import FaceBox from '@/base/reply-message/face';
   import qiniu from '@/api/img';
-  import { Indicator } from 'mint-ui';
+  import { Indicator, Toast } from 'mint-ui';
   import { mapGetters } from 'vuex';
   export default {
     props: {
@@ -51,7 +51,7 @@
         title: '',
         content: '',
         imgList: [],
-        timer: ''
+        uploading: false
       }
     },
     computed: {
@@ -68,9 +68,6 @@
         this.showFace = false;
         if (this.loginIfo.isLogin) {
           this.showContent = true;
-          this.timer = setInterval(function(){
-            document.body.scrollTop = document.body.scrollHeight;
-          }, 100)
         } else {
           this.$router.push({
             path: '/login',
@@ -86,10 +83,14 @@
         this.showContent = true;
       },
       async uploadImg(e) {
+        if (this.imgList.length === 0) {
+          Toast('图片最多上传4张');
+          return false;
+        }
         let file = e.target.files[0];
-        Indicator.open('上传图片中...');
+        this.uploading = true;
         const url = await qiniu.upload(file);
-        Indicator.close();
+        this.uploading = false;
         this.imgList.push(url);
       },
       // 保存
@@ -100,13 +101,12 @@
           imgList: JSON.stringify(this.imgList)
         }
         this.showContent = false;
-        clearInterval(this.timer);
+        this.scrollTop = 0;
         this.$emit('saveMessage', params);
       },
       // 关闭
       closeMessageBox() {
         this.showContent = false;
-        clearInterval(this.timer);
       }
     },
     components: {
@@ -119,12 +119,12 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
   .reply-message-container{
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 10px;
-    z-index: 99999;
+    z-index: 23333;
     background-color: #fff;
     box-shadow: 1px 0 3px #ccc;
     .click-text{
@@ -140,13 +140,15 @@
       right: 0;
       top: 0;
       z-index: 98;
-      background-color: #fff;
+      background-color: #f2f2f2;
       .form-wrapper{
+        height: 192px;
+        background: #fff;
         .form-item{
           textarea{
             box-sizing: border-box;
             width: 100%;
-            height: 80px;
+            height: 100px;
             outline: none;
             padding: 10px;
             border: none;
@@ -167,12 +169,13 @@
         }
       }
       .function-btn-wrapper{
+        background: #fff;
         position: absolute;
-        bottom: 0;
         left: 0;
         right: 0;
+        top: 233px;
         height: 40px;
-        border-top: 1px solid #e7e7e7;
+        border-bottom: 1px solid #e7e7e7;
         display: flex;
         .icon{
           width: 40px;
