@@ -78,7 +78,10 @@ export default new Router({
     },
     {
       path: '/user',
-      component: UserComponent
+      component: UserComponent,
+      meta: {
+        requireAuth: true
+      }
     },
     {
       path: '/login',

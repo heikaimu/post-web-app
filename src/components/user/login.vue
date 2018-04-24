@@ -69,7 +69,7 @@
           this.$store.commit('SET_LOGIN', loginIfo);
           Indicator.close();
           let redirect = decodeURIComponent(this.$route.query.redirect || '/');
-          this.$router.push(redirect);
+          this.$router.replace(redirect);
         } else {
           Indicator.close();
           Toast(message);

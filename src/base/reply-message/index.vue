@@ -69,7 +69,7 @@
         if (this.loginIfo.isLogin) {
           this.showContent = true;
         } else {
-          this.$router.push({
+          this.$router.replace({
             path: '/login',
             query: { redirect: this.$route.fullPath }
           });

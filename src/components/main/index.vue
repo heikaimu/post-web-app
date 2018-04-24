@@ -51,13 +51,6 @@
             case '/main/theme': this.selected = 'theme'
               break;
           }
-        },
-        chargeLogin() {
-          if (this.loginIfo.isLogin) {
-            this.$router.push('/user')
-          } else {
-            this.$router.push('/login')
-          }
         }
       },
       watch: {
@@ -67,7 +60,7 @@
               break;
             case 'theme': this.$router.push('/main/theme')
               break;
-            case 'user': this.chargeLogin()
+            case 'user': this.$router.push('/user')
               break;
           }
         }
