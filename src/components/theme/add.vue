@@ -29,7 +29,7 @@
 
 <script>
   import { convertBase64UrlToBlob } from '@/common/js/baseToBlob';
-  import { Indicator, Toast } from 'mint-ui';
+  import { Toast } from 'mint-ui';
   import qiniu from '@/api/img';
   import { addOne } from '@/api/theme';
     export default {
@@ -60,7 +60,6 @@
             });
             return false;
           }
-          Indicator.open('创建中...');
           const url = await qiniu.upload(file);
           const params = {
             name: this.name,
@@ -68,15 +67,7 @@
           }
           const { state, message, data } = await addOne(params);
           if (state) {
-            Indicator.close();
             this.$router.push(`/post/${data.insertId}`);
-          } else {
-            Indicator.close();
-            Toast({
-              message: message,
-              position: 'bottom',
-              duration: 2000
-            });
           }
         }
       }

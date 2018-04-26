@@ -47,7 +47,7 @@
   import ListImg from '@/base/list-img/index';
   import { addOne, getList } from '@/api/sub-reply';
   import { getDetails } from '@/api/reply';
-  import { Indicator, Toast } from 'mint-ui';
+  import { Toast } from 'mint-ui';
     export default {
       data() {
         return {
@@ -83,12 +83,6 @@
           const { state, message, data } = await getList(params);
           if (state) {
             this.subList = data;
-          } else {
-            Toast({
-              message: message,
-              position: 'bottom',
-              duration: 2000
-            });
           }
         },
         // 新增
@@ -98,17 +92,15 @@
             replyId: this.details.ID,
             content: data.content
           }
-          Indicator.open('回复中...');
           const { state, message } = await addOne(params);
           if (state) {
+            Toast({
+              message: message,
+              position: 'bottom',
+              duration: 2000
+            });
             this._getList();
           }
-          Indicator.close();
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
         },
         closeSubReply() {
           history.go(-1);

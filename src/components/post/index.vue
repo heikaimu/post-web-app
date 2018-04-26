@@ -45,7 +45,7 @@
   import PostItem from '@/components/post/item';
   import ThemeDetails from '@/components/theme/details';
   import ReplyMessage from '@/base/reply-message/index';
-  import { Indicator, Toast } from 'mint-ui';
+  import { Toast } from 'mint-ui';
   import { getDetails } from '@/api/theme';
   import { getList, addOne } from '@/api/post';
   import { mapGetters } from 'vuex';
@@ -163,20 +163,18 @@
       // 发帖
       async saveMessage(params) {
         params.themeId = this.$route.params.id;
-        Indicator.open('保存中...');
         const { state, message } = await addOne(params);
         if (state) {
           this.list = [];
           this.pageId = 1;
           this.isPullUpLoad = true;
+          Toast({
+            message: message,
+            position: 'bottom',
+            duration: 2000
+          });
           this._getPostList();
         }
-        Indicator.close();
-        Toast({
-          message: message,
-          position: 'bottom',
-          duration: 2000
-        });
       },
       imageLoaded() {
         this.$refs.scroll.forceUpdate();

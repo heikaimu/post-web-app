@@ -17,10 +17,8 @@
 </template>
 
 <script>
-  import { Indicator } from 'mint-ui';
-  import { Toast } from 'mint-ui';
   import { MessageBox } from 'mint-ui';
-  import { updatePassword } from '@/api/user';
+  import { updatePassword, logout } from '@/api/user';
   export default {
     data() {
       return {
@@ -35,20 +33,18 @@
           oldPwd: this.currentPwd,
           newPwd: this.newPwd
         }
-        Indicator.open('修改中...');
         const { state, message } = await updatePassword(params);
         if (state) {
-          Indicator.close();
           MessageBox.alert('修改成功，需要重新登录!').then(action => {
-            this.$router.push('/login');
+            this.logout();
           });
-        } else {
-          Indicator.close();
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
+        }
+      },
+      async logout() {
+        const { state } = await logout();
+        if (state) {
+          this.$store.commit('LOGOUT');
+          this.$router.push('/login');
         }
       }
     }

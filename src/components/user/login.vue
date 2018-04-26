@@ -33,8 +33,6 @@
 
 <script>
   import { login, getUser } from '@/api/user';
-  import { Indicator } from 'mint-ui';
-  import { Toast } from 'mint-ui';
   export default {
     data() {
       return {
@@ -49,13 +47,9 @@
           account: this.account,
           password: this.pwd
         }
-        Indicator.open('登录中...');
         const { state, message } = await login(params);
         if (state) {
           this._saveCurrentUser();
-        } else {
-          Indicator.close();
-          Toast(message);
         }
       },
       // 保存当前登录用户信息
@@ -67,12 +61,8 @@
             data: data
           }
           this.$store.commit('SET_LOGIN', loginIfo);
-          Indicator.close();
           let redirect = decodeURIComponent(this.$route.query.redirect || '/');
           this.$router.replace(redirect);
-        } else {
-          Indicator.close();
-          Toast(message);
         }
       }
     }

@@ -169,20 +169,18 @@
       // 保存回复
       async saveMessage(params) {
         params.postId = this.details.ID;
-        Indicator.open('保存中...');
         const { state, message } = await addOne(params);
         if (state) {
           this.list = [];
           this.pageId = 1;
           this.isPullUpLoad = true;
+          Toast({
+            message: message,
+            position: 'bottom',
+            duration: 2000
+          });
           this._getPostList();
         }
-        Indicator.close();
-        Toast({
-          message: message,
-          position: 'bottom',
-          duration: 2000
-        });
       },
       handleBack() {
         history.go(-1);
@@ -195,18 +193,16 @@
         });
       },
       async _delete() {
-        Indicator.open('删除中...');
         const params = {
           postId: this.details.ID
         };
         const { state, message } = await deleteOne(params);
-        Indicator.close();
-        Toast({
-          message: message,
-          position: 'bottom',
-          duration: 2000
-        });
         if (state) {
+          Toast({
+            message: message,
+            position: 'bottom',
+            duration: 2000
+          });
           this.$router.back();
         }
       },
@@ -218,23 +214,21 @@
         });
       },
       async _deleteFloor(id) {
-        Indicator.open('删除中...');
         const params = {
           replyId: id
         };
         const { state, message } = await deleteFloor(params);
-        Indicator.close();
         if (state) {
           this.list = [];
           this.pageId = 1;
           this.isPullUpLoad = true;
+          Toast({
+            message: message,
+            position: 'bottom',
+            duration: 2000
+          });
           this._getPostList();
         }
-        Toast({
-          message: message,
-          position: 'bottom',
-          duration: 2000
-        });
       }
     },
     components: {

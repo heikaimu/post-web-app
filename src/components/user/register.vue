@@ -24,8 +24,6 @@
 
 <script>
   import { login, chargeIsRegister, register, getUser } from '@/api/user';
-  import { Indicator } from 'mint-ui';
-  import { Toast } from 'mint-ui';
     export default {
       data() {
         return {
@@ -126,41 +124,29 @@
             nickname: this.nickname,
             gender: this.gender
           }
-          Indicator.open('注册中...');
           const { state, message } = await register(params);
           if (state) {
-            Indicator.close();
             this._login(params);
-          } else {
-            Indicator.close();
-            Toast(message);
           }
         },
         // 登录
         async _login(params) {
-          Indicator.open('注册成功，登录中...');
           const { state, message } = await login(params);
           if (state) {
             this._saveCurrentUser();
-          } else {
-            Indicator.close();
-            Toast(message);
           }
         },
         // 保存当前登录用户信息
         async _saveCurrentUser() {
           const { state, data, message } = await getUser({});
           if (state) {
-            console.log(data);
             const loginIfo = {
               isLogin: true,
               data: data
             }
             this.$store.commit('SET_LOGIN', loginIfo)
-            Indicator.close();
             this.$router.push('/main');
           } else {
-            Indicator.close();
             Toast(message);
           }
         }

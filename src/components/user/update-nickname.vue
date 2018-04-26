@@ -15,8 +15,6 @@
 </template>
 
 <script>
-  import { Indicator } from 'mint-ui';
-  import { Toast } from 'mint-ui';
   import { updateNickname } from '@/api/user';
   import { mapGetters } from 'vuex';
   export default {
@@ -38,19 +36,10 @@
         const params = {
           nickname: this.nickname
         }
-        Indicator.open('修改中...');
         const { state, message } = await updateNickname(params);
         if (state) {
-          Indicator.close();
           this.$store.commit('SET_NICKNAME', this.nickname);
           this.$router.push('/user');
-        } else {
-          Indicator.close();
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
         }
       }
     }

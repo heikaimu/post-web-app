@@ -65,12 +65,6 @@
             duration: 2000
           });
           this.$emit('refreshDetails', '');
-        } else {
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
         }
       }
     }

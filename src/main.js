@@ -5,8 +5,6 @@ import Vuex from 'vuex'
 import store from './store';
 import App from './App';
 import router from './router';
-import axios from 'axios';
-import VueAxios from 'vue-axios';
 import './common/scss/reset.scss';
 import * as filters from './filter';
 
@@ -16,11 +14,6 @@ Vue.config.productionTip = false;
 import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css';
 Vue.use(Mint);
-
-/* 使用axios获取数据 */
-// axios.defaults.baseURL = 'http://localhost:5000';
-axios.defaults.withCredentials = true;
-Vue.use(VueAxios, axios);
 
 /* 使用vuex来共享组件状态 */
 Vue.use(Vuex);

@@ -18,7 +18,6 @@
 
 <script>
   import { updateBackground } from '@/api/user';
-  import { Indicator, Toast } from 'mint-ui';
     export default {
       data() {
         return {
@@ -34,22 +33,13 @@
       methods: {
         // 修改背景
         async selecteBg(url) {
-          Indicator.open('修改中...');
           const params = {
             background: url
           }
           const { state, message, data } = await updateBackground(params);
           if (state) {
             this.$store.commit('SET_BACKGROUND', url);
-            Indicator.close();
             this.$router.push(`/user`);
-          } else {
-            Indicator.close();
-            Toast({
-              message: message,
-              position: 'bottom',
-              duration: 2000
-            });
           }
         },
         loadMore() {

@@ -18,7 +18,6 @@
 
 <script>
   import { logout } from '@/api/user';
-  import { Toast } from 'mint-ui';
   export default {
     data() {
       return {}
@@ -29,12 +28,6 @@
         if (state) {
           this.$store.commit('LOGOUT');
           this.$router.push('/login');
-        } else {
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
         }
       }
     }

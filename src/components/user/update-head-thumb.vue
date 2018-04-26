@@ -28,8 +28,6 @@
 <script>
   import { convertBase64UrlToBlob } from '@/common/js/baseToBlob';
   import { mapGetters } from 'vuex';
-  import { Indicator } from 'mint-ui';
-  import { Toast } from 'mint-ui';
   import qiniu from '@/api/img';
   import { updateHeadThumb } from '@/api/user';
   export default {
@@ -49,23 +47,14 @@
       async updateHeadThumb() {
         this.headThumb = this.croppa.generateDataUrl('image/jpeg');
         const file = convertBase64UrlToBlob(this.headThumb);
-        Indicator.open('修改中...');
         const url = await qiniu.upload(file);
         const params = {
           headThumb: url
         }
         const { state, message } = await updateHeadThumb(params);
         if (state) {
-          Indicator.close();
           this.$store.commit('SET_HEAD_THUMB', url);
           this.$router.push('/user');
-        } else {
-          Indicator.close();
-          Toast({
-            message: message,
-            position: 'bottom',
-            duration: 2000
-          });
         }
       }
     }
